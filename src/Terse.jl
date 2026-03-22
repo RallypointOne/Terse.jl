@@ -1,60 +1,67 @@
 module Terse
 
-export greet, Config, transform, DEFAULT_GREETING
+export @qtype, @abstract
 
+#--------------------------------------------------------------------------------# @qtype
 """
-    Config
+    @qtype [mutable] Name(field::Type, ...) [<: Supertype]
 
-Configuration for the package.
+Define a struct with positional field syntax.
 
-# Fields
-- `name::String`: The name to use in greetings.
-- `verbose::Bool`: Whether to print extra information.
+### Examples
+
+```julia
+@qtype Point(x::Float64, y::Float64)
+
+@qtype NamedPoint(x::Float64, y::Float64) <: AbstractPoint
+
+@qtype mutable Counter(n::Int) <: AbstractCounter
+```
 """
-struct Config
-    name::String
-    verbose::Bool
+macro qtype(expr)
+    esc(_make_struct(expr, false))
 end
 
-"""
-    greet()
-    greet(name::String)
+macro qtype(mutable_kw, expr)
+    mutable_kw == :mutable || error("@qtype: expected 'mutable', got $mutable_kw")
+    esc(_make_struct(expr, true))
+end
 
-Return a greeting string. If `name` is provided, greet that person.
+function _make_struct(expr, is_mutable)
+    if expr isa Expr && expr.head == :(<:)
+        call_expr = expr.args[1]
+        typename = Expr(:(<:), call_expr.args[1], expr.args[2])
+    else
+        call_expr = expr
+        typename = call_expr.args[1]
+    end
+    fields = call_expr.args[2:end]
+    Expr(:struct, is_mutable, typename, Expr(:block, fields...))
+end
 
-### Examples
-```julia
-julia> greet()
-"Hello from Terse!"
+#--------------------------------------------------------------------------------# @abstract
+macro abstract(expr)
+    stmts = Expr[]
+    _abstract!(stmts, expr, nothing)
+    esc(Expr(:block, stmts...))
+end
 
-julia> greet("Julia")
-"Hello, Julia!"
-```
-"""
-greet() = "Hello from Terse!"
-greet(name::String) = "Hello, $name!"
-
-"""
-    transform(x::AbstractVector; scale=1.0)
-
-Apply a transformation to `x`, scaling each element by `scale`.
-
-### Examples
-```julia
-julia> transform([1, 2, 3]; scale=2.0)
-3-element Vector{Float64}:
- 2.0
- 4.0
- 6.0
-```
-"""
-transform(x::AbstractVector; scale=1.0) = x .* scale
-
-"""
-    DEFAULT_GREETING
-
-The default greeting string used by [`greet`](@ref).
-"""
-const DEFAULT_GREETING = "Hello from Terse!"
+function _abstract!(stmts, expr, parent)
+    if expr isa Symbol
+        push!(stmts, parent === nothing ?
+                     :(abstract type $expr end) :
+                     :(abstract type $expr <: $parent end))
+    elseif expr isa Expr && expr.head == :call
+        name = expr.args[1]
+        push!(stmts, parent === nothing ?
+                     :(abstract type $name end) :
+                     :(abstract type $name <: $parent end))
+        for child in expr.args[2:end]
+            _abstract!(stmts, child, name)
+        end
+    else
+        error("@abstract_types: expected Symbol or call expression, got: $expr")
+    end
+end
 
 end # module
