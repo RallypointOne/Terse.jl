@@ -2,34 +2,34 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "JuliaPackageTemplate.jl",
+    "title": "Terse.jl",
     "section": "",
-    "text": "Overview\nWelcome to the documentation for JuliaPackageTemplate.jl.\nJuliaPackageTemplate.jl is a Julia package that …",
+    "text": "Overview\nWelcome to the documentation for Terse.jl.\nTerse.jl is a Julia package that …",
     "crumbs": [
       "Docs",
-      "<span class='chapter-number'>1</span>  <span class='chapter-title'>JuliaPackageTemplate.jl</span>"
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Terse.jl</span>"
     ]
   },
   {
     "objectID": "index.html#installation",
     "href": "index.html#installation",
-    "title": "JuliaPackageTemplate.jl",
+    "title": "Terse.jl",
     "section": "Installation",
-    "text": "Installation\nusing Pkg\nPkg.add(\"JuliaPackageTemplate\")",
+    "text": "Installation\nusing Pkg\nPkg.add(\"Terse\")",
     "crumbs": [
       "Docs",
-      "<span class='chapter-number'>1</span>  <span class='chapter-title'>JuliaPackageTemplate.jl</span>"
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Terse.jl</span>"
     ]
   },
   {
     "objectID": "index.html#quickstart",
     "href": "index.html#quickstart",
-    "title": "JuliaPackageTemplate.jl",
+    "title": "Terse.jl",
     "section": "Quickstart",
     "text": "Quickstart\n\nprintln(\"Hello, World!\")\n\nHello, World!",
     "crumbs": [
       "Docs",
-      "<span class='chapter-number'>1</span>  <span class='chapter-title'>JuliaPackageTemplate.jl</span>"
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Terse.jl</span>"
     ]
   },
   {
@@ -48,7 +48,7 @@
     "href": "getting-started.html#basic-usage",
     "title": "Getting Started",
     "section": "",
-    "text": "using JuliaPackageTemplate",
+    "text": "using Terse",
     "crumbs": [
       "Docs",
       "Getting Started"
@@ -92,7 +92,7 @@
     "href": "api.html#functions",
     "title": "API",
     "section": "Functions",
-    "text": "Functions\n\n\ngreet\n\n\ngreet()\ngreet(name::String)\nReturn a greeting string. If name is provided, greet that person.\n\nExamples\njulia&gt; greet()\n\"Hello from JuliaPackageTemplate!\"\n\njulia&gt; greet(\"Julia\")\n\"Hello, Julia!\"\n\n\n\n\n\ntransform\n\n\ntransform(x::AbstractVector; scale=1.0)\nApply a transformation to x, scaling each element by scale.\n\nExamples\njulia&gt; transform([1, 2, 3]; scale=2.0)\n3-element Vector{Float64}:\n 2.0\n 4.0\n 6.0",
+    "text": "Functions\n\n\ngreet\n\n\ngreet()\ngreet(name::String)\nReturn a greeting string. If name is provided, greet that person.\n\nExamples\njulia&gt; greet()\n\"Hello from Terse!\"\n\njulia&gt; greet(\"Julia\")\n\"Hello, Julia!\"\n\n\n\n\n\ntransform\n\n\ntransform(x::AbstractVector; scale=1.0)\nApply a transformation to x, scaling each element by scale.\n\nExamples\njulia&gt; transform([1, 2, 3]; scale=2.0)\n3-element Vector{Float64}:\n 2.0\n 4.0\n 6.0",
     "crumbs": [
       "API",
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>API</span>"
