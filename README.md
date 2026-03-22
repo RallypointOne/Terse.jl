@@ -1,9 +1,9 @@
-[![CI](https://github.com/RallypointOne/JuliaPackageTemplate.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/RallypointOne/JuliaPackageTemplate.jl/actions/workflows/CI.yml)
-[![Docs Build](https://github.com/RallypointOne/JuliaPackageTemplate.jl/actions/workflows/Docs.yml/badge.svg)](https://github.com/RallypointOne/JuliaPackageTemplate.jl/actions/workflows/Docs.yml)
-[![Stable Docs](https://img.shields.io/badge/docs-stable-blue)](https://RallypointOne.github.io/JuliaPackageTemplate.jl/stable/)
-[![Dev Docs](https://img.shields.io/badge/docs-dev-blue)](https://RallypointOne.github.io/JuliaPackageTemplate.jl/dev/)
+[![CI](https://github.com/RallypointOne/Terse.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/RallypointOne/Terse.jl/actions/workflows/CI.yml)
+[![Docs Build](https://github.com/RallypointOne/Terse.jl/actions/workflows/Docs.yml/badge.svg)](https://github.com/RallypointOne/Terse.jl/actions/workflows/Docs.yml)
+[![Stable Docs](https://img.shields.io/badge/docs-stable-blue)](https://RallypointOne.github.io/Terse.jl/stable/)
+[![Dev Docs](https://img.shields.io/badge/docs-dev-blue)](https://RallypointOne.github.io/Terse.jl/dev/)
 
-# JuliaPackageTemplate.jl
+# Terse.jl
 
 A template for generating Julia packages developed by Rallypoint One.  Features:
 

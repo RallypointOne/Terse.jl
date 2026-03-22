@@ -7,22 +7,22 @@ toc-depth: 4
 ```{julia}
 #| echo: false
 #| output: false
-using JuliaPackageTemplate
+using Terse
 ```
 
 ```{julia}
 #| echo: false
 #| output: asis
-export_names = filter(!=(:JuliaPackageTemplate), names(JuliaPackageTemplate))
+export_names = filter(!=(:Terse), names(Terse))
 
 classify(b) = b isa Type ? :type : b isa Function ? :function : :constant
 
 for (kind, label) in [(:type, "Types"), (:function, "Functions"), (:constant, "Constants")]
-    items = filter(n -> classify(getfield(JuliaPackageTemplate, n)) == kind, export_names)
+    items = filter(n -> classify(getfield(Terse, n)) == kind, export_names)
     isempty(items) && continue
     println("## $label\n")
     for name in items
-        binding = getfield(JuliaPackageTemplate, name)
+        binding = getfield(Terse, name)
         doc = string(Docs.doc(binding))
         println("""
         ::: {.card .mb-3}

@@ -1,6 +1,6 @@
-using JuliaPackageTemplate
+using Terse
 using Test
 
-@testset "JuliaPackageTemplate.jl" begin
-    @test JuliaPackageTemplate.greet() == "Hello from JuliaPackageTemplate!"
+@testset "Terse.jl" begin
+    @test Terse.greet() == "Hello from Terse!"
 end
