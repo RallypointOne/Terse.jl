@@ -272,29 +272,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> AbstractType</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> AbstractType <span class="op">&gt;</span> (<span class="fu">Subtype1</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span>(fields<span class="op">...</span>))</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">AbstractType</span><span class="dt">{T} </span>&gt; (<span class="fu">Subtype1</span><span class="dt">{T}</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span><span class="dt">{T, S}</span>(fields<span class="op">...</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Define an abstract type and a set of concrete subtypes in one expression. Subtypes can themselves use <code>&gt;</code> to define nested type hierarchies. Bare names (no parentheses) produce zero-field structs that inherit the parent’s type parameters.</p>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">ConcreteType</span>(pos_fields<span class="op">...</span>; kw_fields<span class="op">...</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">ConcreteType</span>(pos_fields<span class="op">...</span>; kw_fields<span class="op">...</span>) <span class="op">&lt;:</span><span class="dt"> SuperType</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] AbstractType <span class="op">&gt;</span> (<span class="fu">Subtype1</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span>(fields<span class="op">...</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">AbstractType</span><span class="dt">{T} </span>&gt; (<span class="fu">Subtype1</span><span class="dt">{T}</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span><span class="dt">{T, S}</span>(fields<span class="op">...</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Define abstract types, concrete structs, or full type hierarchies in one expression.</p>
+<ul>
+<li><code>mutable</code> makes all generated concrete structs mutable.</li>
+<li>Fields with default values (<code>field::T = val</code>) generate inner constructors for both positional-with-defaults and keyword argument construction.</li>
+<li>Use <code>;</code> to separate positional fields from keyword-only fields, generating a single constructor that mirrors the exact positional/keyword split you specify.</li>
+<li>Subtypes can themselves use <code>&gt;</code> to define nested hierarchies.</li>
+<li>Bare names (no parentheses) produce zero-field structs inheriting the parent’s type parameters.</li>
+</ul>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal <span class="op">&gt;</span> (</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int</span>),</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span><span class="dt">{T}</span>(lives<span class="op">::</span><span class="dt">Int</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span><span class="dt">{T, S}</span>(name<span class="op">::</span><span class="dt">S</span>, family<span class="op">::</span><span class="dt">T</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>) <span class="op">&lt;:</span><span class="dt"> Animal</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> mutable <span class="fu">Counter</span>(n<span class="op">::</span><span class="dt">Int </span><span class="op">=</span> <span class="fl">0</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">Server</span>(host<span class="op">::</span><span class="dt">String</span>; port<span class="op">::</span><span class="dt">Int </span><span class="op">=</span> <span class="fl">8080</span>, timeout<span class="op">::</span><span class="dt">Int </span><span class="op">=</span> <span class="fl">30</span>)</span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span><span class="dt">{T}</span>(lives<span class="op">::</span><span class="dt">Int</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span><span class="dt">{T, S &lt;: AbstractString}</span>(name<span class="op">::</span><span class="dt">S</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    Invertebrate{T} <span class="op">&gt;</span> (</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        Worm,</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">Insect</span><span class="dt">{T, I &lt;: Integer}</span>(legs<span class="op">::</span><span class="dt">I</span>, family<span class="op">::</span><span class="dt">T</span>)</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal <span class="op">&gt;</span> (</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int</span>),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span><span class="dt">{T}</span>(lives<span class="op">::</span><span class="dt">Int</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span><span class="dt">{T, S &lt;: AbstractString}</span>(name<span class="op">::</span><span class="dt">S</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    Invertebrate{T} <span class="op">&gt;</span> (</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        Worm,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">Insect</span><span class="dt">{T, I &lt;: Integer}</span>(legs<span class="op">::</span><span class="dt">I</span>, family<span class="op">::</span><span class="dt">T</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </div>
 </div>
