@@ -186,8 +186,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Getting Started</span></a>
+  <a href="./getting-started.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Getting Started</span></a>
   </div>
 </li>
       </ul>
@@ -239,9 +238,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#types" id="toc-types" class="nav-link active" data-scroll-target="#types">Types</a></li>
-  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions">Functions</a></li>
-  <li><a href="#constants" id="toc-constants" class="nav-link" data-scroll-target="#constants">Constants</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">Functions</a></li>
   </ul>
 </nav>
     </div>
@@ -267,78 +264,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="types" class="level2">
-<h2 class="anchored" data-anchor-id="types">Types</h2>
-<div class="card mb-3">
-<section id="config" class="level4 card-header api-item-header">
-<h4 class="anchored" data-anchor-id="config"><code>Config</code></h4>
-</section>
-<div class="card-body">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Config</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Configuration for the package.</p>
-<section id="fields" class="level1">
-<h1>Fields</h1>
-<ul>
-<li><code>name::String</code>: The name to use in greetings.</li>
-<li><code>verbose::Bool</code>: Whether to print extra information.</li>
-</ul>
-</section>
-</div>
-</div>
-</section>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
 <div class="card mb-3">
-<section id="greet" class="level4 card-header api-item-header">
-<h4 class="anchored" data-anchor-id="greet"><code>greet</code></h4>
+<section id="types-types" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="types-types"><code>@types</code> {#<span class="citation" data-cites="types">@types</span>}</h4>
 </section>
 <div class="card-body">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">greet</span>()</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">greet</span>(name<span class="op">::</span><span class="dt">String</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Return a greeting string. If <code>name</code> is provided, greet that person.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> AbstractType</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> AbstractType <span class="op">&gt;</span> (<span class="fu">Subtype1</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span>(fields<span class="op">...</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">AbstractType</span><span class="dt">{T} </span>&gt; (<span class="fu">Subtype1</span><span class="dt">{T}</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span><span class="dt">{T, S}</span>(fields<span class="op">...</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Define an abstract type and a set of concrete subtypes in one expression. Subtypes can themselves use <code>&gt;</code> to define nested type hierarchies. Bare names (no parentheses) produce zero-field structs that inherit the parent’s type parameters.</p>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>julia<span class="op">&gt;</span> <span class="fu">greet</span>()</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="st">"Hello from Terse!"</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>julia<span class="op">&gt;</span> <span class="fu">greet</span>(<span class="st">"Julia"</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">"Hello, Julia!"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal <span class="op">&gt;</span> (</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span><span class="dt">{T}</span>(lives<span class="op">::</span><span class="dt">Int</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span><span class="dt">{T, S}</span>(name<span class="op">::</span><span class="dt">S</span>, family<span class="op">::</span><span class="dt">T</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span><span class="dt">{T}</span>(lives<span class="op">::</span><span class="dt">Int</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span><span class="dt">{T, S &lt;: AbstractString}</span>(name<span class="op">::</span><span class="dt">S</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    Invertebrate{T} <span class="op">&gt;</span> (</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        Worm,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">Insect</span><span class="dt">{T, I &lt;: Integer}</span>(legs<span class="op">::</span><span class="dt">I</span>, family<span class="op">::</span><span class="dt">T</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-</div>
-</div>
-<div class="card mb-3">
-<section id="transform" class="level4 card-header api-item-header">
-<h4 class="anchored" data-anchor-id="transform"><code>transform</code></h4>
-</section>
-<div class="card-body">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">transform</span>(x<span class="op">::</span><span class="dt">AbstractVector</span>; scale<span class="op">=</span><span class="fl">1.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Apply a transformation to <code>x</code>, scaling each element by <code>scale</code>.</p>
-<section id="examples-1" class="level3">
-<h3 class="anchored" data-anchor-id="examples-1">Examples</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>julia<span class="op">&gt;</span> <span class="fu">transform</span>([<span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>]; scale<span class="op">=</span><span class="fl">2.0</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fl">3</span><span class="op">-</span>element <span class="dt">Vector</span>{<span class="dt">Float64</span>}<span class="op">:</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a> <span class="fl">2.0</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a> <span class="fl">4.0</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a> <span class="fl">6.0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-</div>
-</div>
-</section>
-<section id="constants" class="level2">
-<h2 class="anchored" data-anchor-id="constants">Constants</h2>
-<div class="card mb-3">
-<section id="default_greeting" class="level4 card-header api-item-header">
-<h4 class="anchored" data-anchor-id="default_greeting"><code>DEFAULT_GREETING</code></h4>
-</section>
-<div class="card-body">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">String</span>(s<span class="op">::</span><span class="dt">AbstractString</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Create a new <code>String</code> from an existing <code>AbstractString</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">String</span>(v<span class="op">::</span><span class="dt">AbstractVector{UInt8}</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Create a new <code>String</code> object using the data buffer from byte vector <code>v</code>. If <code>v</code> is a <code>Vector{UInt8}</code> it will be truncated to zero length and future modification of <code>v</code> cannot affect the contents of the resulting string. To avoid truncation of <code>Vector{UInt8}</code> data, use <code>String(copy(v))</code>; for other <code>AbstractVector</code> types, <code>String(v)</code> already makes a copy.</p>
-<p>When possible, the memory of <code>v</code> will be used without copying when the <code>String</code> object is created. This is guaranteed to be the case for byte vectors returned by <a href="@ref"><code>take!</code></a> on a writable <a href="@ref"><code>IOBuffer</code></a> and by calls to <a href="@ref"><code>read(io, nb)</code></a>. This allows zero-copy conversion of I/O data to strings. In other cases, <code>Vector{UInt8}</code> data may be copied, but <code>v</code> is truncated anyway to guarantee consistent behavior.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">String</span> <span class="op">&lt;:</span><span class="dt"> AbstractString</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The default string type in Julia, used by e.g.&nbsp;string literals.</p>
-<p><code>String</code>s are immutable sequences of <code>Char</code>s. A <code>String</code> is stored internally as a contiguous byte array, and while they are interpreted as being UTF-8 encoded, they can be composed of any byte sequence. Use <a href="@ref"><code>isvalid</code></a> to validate that the underlying byte sequence is valid as UTF-8.</p>
 </div>
 </div>
 
@@ -749,7 +706,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./getting-started.html" class="pagination-link" aria-label="Getting Started">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Getting Started</span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Getting Started</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

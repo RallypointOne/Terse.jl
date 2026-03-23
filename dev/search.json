@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "Terse.jl",
     "section": "",
-    "text": "Overview\nWelcome to the documentation for Terse.jl.\nTerse.jl is a Julia package that …",
+    "text": "Installation\nTerse.jl provides the @types macro for defining Julia type hierarchies concisely.",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>Terse.jl</span>"
@@ -14,8 +14,8 @@
     "objectID": "index.html#installation",
     "href": "index.html#installation",
     "title": "Terse.jl",
-    "section": "Installation",
-    "text": "Installation\nusing Pkg\nPkg.add(\"Terse\")",
+    "section": "",
+    "text": "using Pkg\nPkg.add(\"Terse\")",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>Terse.jl</span>"
@@ -26,7 +26,7 @@
     "href": "index.html#quickstart",
     "title": "Terse.jl",
     "section": "Quickstart",
-    "text": "Quickstart\n\nprintln(\"Hello, World!\")\n\nHello, World!",
+    "text": "Quickstart\n\nusing Terse\n\n@types Shape &gt; (\n    Circle(radius::Float64),\n    Rectangle(width::Float64, height::Float64)\n)\n\n@show supertype(Circle), supertype(Rectangle)\nCircle(1.0), Rectangle(3.0, 4.0)\n\n(supertype(Circle), supertype(Rectangle)) = (Main.Notebook.Shape, Main.Notebook.Shape)\n\n\n(Circle(1.0), Rectangle(3.0, 4.0))\n\n\nSee Getting Started for a full overview of all supported syntax forms.",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>Terse.jl</span>"
@@ -37,32 +37,54 @@
     "href": "getting-started.html",
     "title": "Getting Started",
     "section": "",
-    "text": "Basic Usage",
+    "text": "Standalone Abstract Type\nUse @types with just a name to declare an abstract type:\n@types Organism\nisabstracttype(Organism)\n\ntrue\nParametric abstract types are supported too:\n@types Container{T}\nisabstracttype(Container)\n\ntrue",
     "crumbs": [
       "Docs",
-      "Getting Started"
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
     ]
   },
   {
-    "objectID": "getting-started.html#basic-usage",
-    "href": "getting-started.html#basic-usage",
+    "objectID": "getting-started.html#abstract-type-with-subtypes",
+    "href": "getting-started.html#abstract-type-with-subtypes",
     "title": "Getting Started",
-    "section": "",
-    "text": "using Terse",
+    "section": "Abstract Type with Subtypes",
+    "text": "Abstract Type with Subtypes\nUse &gt; to define an abstract type and its concrete subtypes together:\n\n@types Animal &gt; (\n    Cat(lives::Int),\n    Dog(name::String)\n)\n\nsupertype(Cat), supertype(Dog)\n\n(Animal, Animal)\n\n\n\nCat(9), Dog(\"Rex\")\n\n(Cat(9), Dog(\"Rex\"))",
     "crumbs": [
       "Docs",
-      "Getting Started"
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
     ]
   },
   {
-    "objectID": "getting-started.html#examples",
-    "href": "getting-started.html#examples",
+    "objectID": "getting-started.html#parametric-types",
+    "href": "getting-started.html#parametric-types",
     "title": "Getting Started",
-    "section": "Examples",
-    "text": "Examples\nTODO: Add examples here.",
+    "section": "Parametric Types",
+    "text": "Parametric Types\nType parameters and bounds work as normal Julia syntax inside {}:\n\n@types Envelope{T} &gt; (\n    Plain{T}(value::T),\n    Labelled{T, S &lt;: AbstractString}(value::T, label::S)\n)\n\nLabelled{Int, String}(42, \"answer\")\n\nLabelled{Int64, String}(42, \"answer\")",
     "crumbs": [
       "Docs",
-      "Getting Started"
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#nested-hierarchies",
+    "href": "getting-started.html#nested-hierarchies",
+    "title": "Getting Started",
+    "section": "Nested Hierarchies",
+    "text": "Nested Hierarchies\nA subtype can itself be an abstract type with its own subtypes by using &gt; again. Bare names (no parentheses) produce zero-field structs that inherit the parent’s type parameters:\n\n@types Animal2{T} &gt; (\n    Mammal{T}(family::T),\n    Invertebrate{T} &gt; (\n        Worm,\n        Insect{T, I &lt;: Integer}(legs::I, family::T)\n    )\n)\n\nsupertype(Invertebrate{Float64}), supertype(Worm{Float64})\n\n(Animal2{Float64}, Invertebrate{Float64})\n\n\n\nWorm{String}(), Insect{Float64, Int8}(6, 1.0)\n\n(Worm{String}(), Insect{Float64, Int8}(6, 1.0))",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#single-concrete-type",
+    "href": "getting-started.html#single-concrete-type",
+    "title": "Getting Started",
+    "section": "Single Concrete Type",
+    "text": "Single Concrete Type\nDefine a single struct without a hierarchy:\n\n@types Point(x::Float64, y::Float64)\nPoint(1.0, 2.0)\n\nPoint(1.0, 2.0)\n\n\nTo specify a supertype, use &lt;::\n\n@types Organism2\n@types Bacterium(name::String) &lt;: Organism2\n\nsupertype(Bacterium)\n\nOrganism2",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
     ]
   },
   {
@@ -70,43 +92,21 @@
     "href": "api.html",
     "title": "API",
     "section": "",
-    "text": "Types",
+    "text": "Functions",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>API</span>"
-    ]
-  },
-  {
-    "objectID": "api.html#types",
-    "href": "api.html#types",
-    "title": "API",
-    "section": "",
-    "text": "Config\n\n\nConfig\nConfiguration for the package.\n\nFields\n\nname::String: The name to use in greetings.\nverbose::Bool: Whether to print extra information.",
-    "crumbs": [
-      "API",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
     "objectID": "api.html#functions",
     "href": "api.html#functions",
     "title": "API",
-    "section": "Functions",
-    "text": "Functions\n\n\ngreet\n\n\ngreet()\ngreet(name::String)\nReturn a greeting string. If name is provided, greet that person.\n\nExamples\njulia&gt; greet()\n\"Hello from Terse!\"\n\njulia&gt; greet(\"Julia\")\n\"Hello, Julia!\"\n\n\n\n\n\ntransform\n\n\ntransform(x::AbstractVector; scale=1.0)\nApply a transformation to x, scaling each element by scale.\n\nExamples\njulia&gt; transform([1, 2, 3]; scale=2.0)\n3-element Vector{Float64}:\n 2.0\n 4.0\n 6.0",
+    "section": "",
+    "text": "@types {#@types}\n\n\n@types AbstractType\n@types AbstractType &gt; (Subtype1(fields...), Subtype2(fields...))\n@types AbstractType{T} &gt; (Subtype1{T}(fields...), Subtype2{T, S}(fields...))\nDefine an abstract type and a set of concrete subtypes in one expression. Subtypes can themselves use &gt; to define nested type hierarchies. Bare names (no parentheses) produce zero-field structs that inherit the parent’s type parameters.\n\nExamples\n@types Animal &gt; (\n    Cat(lives::Int),\n    Dog(name::String)\n)\n\n@types Animal{T} &gt; (\n    Cat{T}(lives::Int, family::T),\n    Dog{T, S}(name::S, family::T)\n)\n\n@types Animal{T} &gt; (\n    Cat{T}(lives::Int, family::T),\n    Dog{T, S &lt;: AbstractString}(name::S, family::T),\n    Invertebrate{T} &gt; (\n        Worm,\n        Insect{T, I &lt;: Integer}(legs::I, family::T)\n    )\n)",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>API</span>"
-    ]
-  },
-  {
-    "objectID": "api.html#constants",
-    "href": "api.html#constants",
-    "title": "API",
-    "section": "Constants",
-    "text": "Constants\n\n\nDEFAULT_GREETING\n\n\nString(s::AbstractString)\nCreate a new String from an existing AbstractString.\nString(v::AbstractVector{UInt8})\nCreate a new String object using the data buffer from byte vector v. If v is a Vector{UInt8} it will be truncated to zero length and future modification of v cannot affect the contents of the resulting string. To avoid truncation of Vector{UInt8} data, use String(copy(v)); for other AbstractVector types, String(v) already makes a copy.\nWhen possible, the memory of v will be used without copying when the String object is created. This is guaranteed to be the case for byte vectors returned by take! on a writable IOBuffer and by calls to read(io, nb). This allows zero-copy conversion of I/O data to strings. In other cases, Vector{UInt8} data may be copied, but v is truncated anyway to guarantee consistent behavior.\nString &lt;: AbstractString\nThe default string type in Julia, used by e.g. string literals.\nStrings are immutable sequences of Chars. A String is stored internally as a contiguous byte array, and while they are interpreted as being UTF-8 encoded, they can be composed of any byte sequence. Use isvalid to validate that the underlying byte sequence is valid as UTF-8.",
-    "crumbs": [
-      "API",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -117,7 +117,7 @@
     "text": "Unreleased",
     "crumbs": [
       "Resources",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
     ]
   }
 ]
