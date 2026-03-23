@@ -2,22 +2,78 @@ module Terse
 
 export @types
 
-#-----------------------------------------------------------------------------# helpers
+#-----------------------------------------------------------------------------# @types helpers
 function _terse_parse_type(ex)
     ex isa Symbol && return ex, Any[]
     Meta.isexpr(ex, :curly) && return ex.args[1], ex.args[2:end]
     error("@types: invalid type expression: $ex")
 end
 
+# Returns (name, params, pos_fields, kw_fields).
+# kw_fields is non-empty only when the user used ; in the field list.
 function _terse_parse_subtype(ex)
     Meta.isexpr(ex, :call) || error("@types: expected `TypeName(fields...)`, got: $ex")
     name, params = _terse_parse_type(ex.args[1])
-    return name, params, ex.args[2:end]
+    rest = ex.args[2:end]
+    if !isempty(rest) && Meta.isexpr(rest[1], :parameters)
+        return name, params, rest[2:end], rest[1].args
+    else
+        return name, params, rest, Any[]
+    end
+end
+
+# Extract the base constructor name from a struct sig (strips <: and curly).
+function _ctor_name(sig)
+    sig = Meta.isexpr(sig, :<:) ? sig.args[1] : sig
+    Meta.isexpr(sig, :curly) ? sig.args[1] : sig
+end
+
+# Strip default from a field declaration: Expr(:kw, field, default) → field
+_plain(f) = Meta.isexpr(f, :kw) ? f.args[1] : f
+
+# Extract field name from a plain field: Expr(:(::), name, type) → name, or bare Symbol
+_fname(f) = Meta.isexpr(f, :(::)) ? f.args[1] : f
+
+# Build a struct Expr, generating inner constructors when defaults or keyword args are present.
+function _make_struct(is_mutable, sig, pos_fields, kw_fields=Any[])
+    has_pos_defaults = any(f -> Meta.isexpr(f, :kw), pos_fields)
+    has_explicit_kw  = !isempty(kw_fields)
+
+    plain_pos = map(_plain, pos_fields)
+    plain_kw  = map(_plain, kw_fields)
+    all_plain = [plain_pos; plain_kw]
+
+    # No defaults, no explicit keyword section → plain struct, no inner constructor
+    !has_pos_defaults && !has_explicit_kw &&
+        return Expr(:struct, is_mutable, sig, Expr(:block, pos_fields...))
+
+    all_names = map(_fname, all_plain)
+    ctor      = _ctor_name(sig)
+
+    if has_explicit_kw
+        # User separated positional and keyword args with ;
+        # Generate one constructor mirroring the user's intent exactly.
+        ctor_def = Expr(:(=),
+            Expr(:call, ctor, Expr(:parameters, kw_fields...), pos_fields...),
+            Expr(:call, :new, all_names...))
+        return Expr(:struct, is_mutable, sig, Expr(:block, all_plain..., ctor_def))
+    else
+        # All fields positional, some with defaults.
+        # Generate both a positional-with-defaults and a keyword-only constructor.
+        required = filter(f -> !Meta.isexpr(f, :kw), pos_fields)
+        optional = filter(f ->  Meta.isexpr(f, :kw), pos_fields)
+        pos_ctor = Expr(:(=),
+            Expr(:call, ctor, pos_fields...),
+            Expr(:call, :new, all_names...))
+        kw_ctor  = Expr(:(=),
+            Expr(:call, ctor, Expr(:parameters, optional...), required...),
+            Expr(:call, :new, all_names...))
+        return Expr(:struct, is_mutable, sig, Expr(:block, all_plain..., pos_ctor, kw_ctor))
+    end
 end
 
 # Recursively build declarations for a type hierarchy.
-# parent_head: the supertype expression to use, or nothing for the root.
-function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing)
+function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing; is_mutable=false)
     abstract_name, abstract_params = _terse_parse_type(abstract_expr)
     abstract_head = isempty(abstract_params) ? abstract_name : Expr(:curly, abstract_name, abstract_params...)
 
@@ -28,44 +84,73 @@ function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing)
 
     decls = map(subtypes) do st
         if Meta.isexpr(st, :call) && st.args[1] == :>
-            # Nested hierarchy: recurse with this abstract type as parent
-            _types_impl(st.args[2], st.args[3], abstract_head)
+            _types_impl(st.args[2], st.args[3], abstract_head; is_mutable)
         elseif st isa Symbol
-            # Bare symbol: zero-field struct, inherits parent's type params
             sig = isempty(abstract_params) ? st : Expr(:curly, st, abstract_params...)
-            Expr(:struct, false, Expr(:<:, sig, abstract_head), Expr(:block))
+            _make_struct(is_mutable, Expr(:<:, sig, abstract_head), Any[])
         else
-            # Regular subtype with explicit fields
-            name, params, fields = _terse_parse_subtype(st)
+            name, params, pos_fields, kw_fields = _terse_parse_subtype(st)
             sig = isempty(params) ? name : Expr(:curly, name, params...)
-            Expr(:struct, false, Expr(:<:, sig, abstract_head), Expr(:block, fields...))
+            _make_struct(is_mutable, Expr(:<:, sig, abstract_head), pos_fields, kw_fields)
         end
     end
 
     return Expr(:block, abstract_decl, decls...)
 end
 
+function _types_single(is_mutable, ex)
+    if ex isa Symbol || Meta.isexpr(ex, :curly)
+        abstract_name, abstract_params = _terse_parse_type(ex)
+        abstract_head = isempty(abstract_params) ? abstract_name : Expr(:curly, abstract_name, abstract_params...)
+        return Expr(:abstract, abstract_head)
+    elseif Meta.isexpr(ex, :call) && ex.args[1] != :>
+        name, params, pos_fields, kw_fields = _terse_parse_subtype(ex)
+        sig = isempty(params) ? name : Expr(:curly, name, params...)
+        return _make_struct(is_mutable, sig, pos_fields, kw_fields)
+    elseif Meta.isexpr(ex, :<:)
+        name, params, pos_fields, kw_fields = _terse_parse_subtype(ex.args[1])
+        sig = isempty(params) ? name : Expr(:curly, name, params...)
+        return _make_struct(is_mutable, Expr(:<:, sig, ex.args[2]), pos_fields, kw_fields)
+    elseif Meta.isexpr(ex, :call) && ex.args[1] == :>
+        return _types_impl(ex.args[2], ex.args[3]; is_mutable)
+    end
+    error("@types: unrecognised syntax: $ex")
+end
+
 #-----------------------------------------------------------------------------# @types
 """
     @types AbstractType
-    @types AbstractType > (Subtype1(fields...), Subtype2(fields...))
-    @types AbstractType{T} > (Subtype1{T}(fields...), Subtype2{T, S}(fields...))
+    @types [mutable] ConcreteType(pos_fields...; kw_fields...)
+    @types [mutable] ConcreteType(pos_fields...; kw_fields...) <: SuperType
+    @types [mutable] AbstractType > (Subtype1(fields...), Subtype2(fields...))
+    @types [mutable] AbstractType{T} > (Subtype1{T}(fields...), Subtype2{T, S}(fields...))
 
-Define an abstract type and a set of concrete subtypes in one expression.
-Subtypes can themselves use `>` to define nested type hierarchies.
-Bare names (no parentheses) produce zero-field structs that inherit the parent's type parameters.
+Define abstract types, concrete structs, or full type hierarchies in one expression.
+
+- `mutable` makes all generated concrete structs mutable.
+- Fields with default values (`field::T = val`) generate inner constructors for both
+  positional-with-defaults and keyword argument construction.
+- Use `;` to separate positional fields from keyword-only fields, generating a single
+  constructor that mirrors the exact positional/keyword split you specify.
+- Subtypes can themselves use `>` to define nested hierarchies.
+- Bare names (no parentheses) produce zero-field structs inheriting the parent's type parameters.
 
 ### Examples
 
 ```julia
+@types Animal
+
+@types Cat(lives::Int)
+
+@types Dog(name::String) <: Animal
+
+@types mutable Counter(n::Int = 0)
+
+@types Server(host::String; port::Int = 8080, timeout::Int = 30)
+
 @types Animal > (
     Cat(lives::Int),
     Dog(name::String)
-)
-
-@types Animal{T} > (
-    Cat{T}(lives::Int, family::T),
-    Dog{T, S}(name::S, family::T)
 )
 
 @types Animal{T} > (
@@ -79,22 +164,12 @@ Bare names (no parentheses) produce zero-field structs that inherit the parent's
 ```
 """
 macro types(ex)
-    if ex isa Symbol || Meta.isexpr(ex, :curly)
-        abstract_name, abstract_params = _terse_parse_type(ex)
-        abstract_head = isempty(abstract_params) ? abstract_name : Expr(:curly, abstract_name, abstract_params...)
-        return esc(Expr(:abstract, abstract_head))
-    elseif Meta.isexpr(ex, :call) && ex.args[1] != :>
-        name, params, fields = _terse_parse_subtype(ex)
-        sig = isempty(params) ? name : Expr(:curly, name, params...)
-        return esc(Expr(:struct, false, sig, Expr(:block, fields...)))
-    elseif Meta.isexpr(ex, :<:)
-        name, params, fields = _terse_parse_subtype(ex.args[1])
-        sig = isempty(params) ? name : Expr(:curly, name, params...)
-        return esc(Expr(:struct, false, Expr(:<:, sig, ex.args[2]), Expr(:block, fields...)))
-    end
-    Meta.isexpr(ex, :call) && ex.args[1] == :> ||
-        error("@types: expected `AbstractType`, `ConcreteType(fields...)`, or `AbstractType > (subtypes...)`")
-    return esc(_types_impl(ex.args[2], ex.args[3]))
+    esc(_types_single(false, ex))
+end
+
+macro types(mutable_kw, ex)
+    mutable_kw === :mutable || error("@types: expected `mutable`, got `$mutable_kw`")
+    esc(_types_single(true, ex))
 end
 
 end # module

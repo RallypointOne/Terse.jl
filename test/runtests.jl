@@ -66,6 +66,71 @@ using Test
         @test TypedSub{String}("hi") isa MySupertype
     end
 
+    @testset "@types mutable" begin
+        @types mutable Counter(n::Int)
+        @types mutable Animal3
+        @types mutable Labeled(label::String) <: Animal3
+        @types mutable Vehicle > (Car(doors::Int), Bike(gears::Int))
+        c = Counter(0)
+        c.n = 5
+        @test c.n == 5
+        @test ismutabletype(Counter)
+        @test ismutabletype(Labeled)
+        @test ismutabletype(Car)
+        @test ismutabletype(Bike)
+    end
+
+    @testset "@types default field values" begin
+        @types Point2D(x::Float64 = 0.0, y::Float64 = 0.0)
+        # positional with defaults
+        @test Point2D() == Point2D(0.0, 0.0)
+        @test Point2D(1.0) == Point2D(1.0, 0.0)
+        @test Point2D(1.0, 2.0) == Point2D(1.0, 2.0)
+        # keyword construction
+        @test Point2D(x=3.0) == Point2D(3.0, 0.0)
+        @test Point2D(y=4.0) == Point2D(0.0, 4.0)
+        @test Point2D(x=1.0, y=2.0) == Point2D(1.0, 2.0)
+    end
+
+    @testset "@types mixed required and default fields" begin
+        @types Config(host::String, port::Int = 8080, timeout::Int = 30)
+        @test Config("localhost") == Config("localhost", 8080, 30)
+        @test Config("localhost", 9000) == Config("localhost", 9000, 30)
+        @test Config("localhost", port=9000) == Config("localhost", 9000, 30)
+        @test Config("localhost", timeout=60) == Config("localhost", 8080, 60)
+    end
+
+    @testset "@types mutable with defaults" begin
+        @types mutable MutPoint(x::Float64 = 0.0, y::Float64 = 0.0)
+        p = MutPoint()
+        p.x = 5.0
+        @test p.x == 5.0
+        @test ismutabletype(MutPoint)
+        p2 = MutPoint(x=1.0)
+        @test p2.x == 1.0 && p2.y == 0.0
+    end
+
+    @testset "@types explicit keyword args" begin
+        # Required positional + keyword-only with default
+        @types Server(host::String; port::Int = 8080)
+        s = Server("localhost")
+        @test s.host == "localhost" && s.port == 8080
+        s2 = Server("localhost", port=9000)
+        @test s2.port == 9000
+
+        # Positional with default + keyword-only with default
+        @types Request(path::String = "/"; method::String = "GET", timeout::Int = 30)
+        r = Request()
+        @test r.path == "/" && r.method == "GET" && r.timeout == 30
+        r2 = Request("/api", method="POST")
+        @test r2.path == "/api" && r2.method == "POST" && r2.timeout == 30
+
+        # Required keyword arg (no default)
+        @types Credentials(; username::String, password::String)
+        c = Credentials(username="alice", password="secret")
+        @test c.username == "alice" && c.password == "secret"
+    end
+
     @testset "@types bounded type params" begin
         @types Wrapper{T} > (
             Plain{T}(value::T),
