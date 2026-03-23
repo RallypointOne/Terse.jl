@@ -5,38 +5,61 @@
 
 # Terse.jl
 
-A template for generating Julia packages developed by Rallypoint One.  Features:
+Terse.jl provides the `@types` macro for defining type hierarchies concisely.
 
-- Docs built via [quarto](https://quarto.org), deployed via GitHub Action
-- Versioned docs
-- Coverage report hosted alongside docs, built with [LocalCoverage](https://github.com/JuliaCI/LocalCoverage.jl)
-- A thoughtful CLAUDE.md for AI-assisted development
-- Rallypoint One branding/styles
+## Installation
 
-## Docs Structure (gh-pages)
-
-After several releases, the `gh-pages` branch will have this structure:
-
-```
-gh-pages/
-├── .nojekyll
-├── index.html              # redirect → /RepoName/stable/
-├── versions.json           # ["v1.0.0", "v0.2.0", "v0.1.0"]
-├── stable/
-│   └── index.html          # redirect → /RepoName/<latest tag>/
-├── dev/
-│   └── <full quarto site>  # rebuilt on every push to main
-├── v0.1.0/
-│   └── <full quarto site>  # built on release publish
-├── v0.2.0/
-│   └── <full quarto site>
-└── v1.0.0/
-    └── <full quarto site>
+```julia
+using Pkg
+Pkg.add("Terse")
 ```
 
-- **`/`** redirects to **`/stable/`**
-- **`/stable/`** redirects to the latest release tag
-- **`/dev/`** is rebuilt on every push to `main`
-- **`/vX.Y.Z/`** directories are created on each release
-- **`versions.json`** tracks all released versions, sorted by semver descending
-- Before any release exists, `/stable/` shows a placeholder page linking to `/dev/`
+## Usage
+
+```julia
+using Terse
+```
+
+**Standalone abstract type:**
+
+```julia
+@types Animal
+```
+
+**Abstract type with concrete subtypes:**
+
+```julia
+@types Animal > (
+    Cat(lives::Int),
+    Dog(name::String)
+)
+```
+
+**Parametric types with bounded type parameters:**
+
+```julia
+@types Animal{T} > (
+    Cat{T}(lives::Int, family::T),
+    Dog{T, S <: AbstractString}(name::S, family::T)
+)
+```
+
+**Nested hierarchies:**
+
+```julia
+@types Animal{T} > (
+    Cat{T}(lives::Int, family::T),
+    Invertebrate{T} > (
+        Worm,
+        Insect{T, I <: Integer}(legs::I, family::T)
+    )
+)
+```
+
+**Single concrete type (with optional supertype):**
+
+```julia
+@types Point(x::Float64, y::Float64)
+
+@types Wrapper{T}(value::T) <: Animal{T}
+```

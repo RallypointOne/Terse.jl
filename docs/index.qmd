@@ -1,12 +1,9 @@
 ---
 title: "Terse.jl"
+engine: julia
 ---
 
-Welcome to the documentation for **Terse.jl**.
-
-## Overview
-
-Terse.jl is a Julia package that ...
+Terse.jl provides the `@types` macro for defining Julia type hierarchies concisely.
 
 ## Installation
 
@@ -18,5 +15,15 @@ Pkg.add("Terse")
 ## Quickstart
 
 ```{julia}
-println("Hello, World!")
+using Terse
+
+@types Shape > (
+    Circle(radius::Float64),
+    Rectangle(width::Float64, height::Float64)
+)
+
+@show supertype(Circle), supertype(Rectangle)
+Circle(1.0), Rectangle(3.0, 4.0)
 ```
+
+See [Getting Started](getting-started.qmd) for a full overview of all supported syntax forms.
