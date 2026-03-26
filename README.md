@@ -74,7 +74,41 @@ using Terse
 | Full type hierarchy in one expression | | | | | ✓ |
 | Nested abstract hierarchies | | | | | ✓ |
 
-The key differentiator: `@types` lets you define an entire abstract type tree — with concrete leaf types, default values, and keyword constructors — in a single expression.
-[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) is the closest alternative for concise struct syntax but only defines one concrete type at a time with no hierarchy support.
-[Parameters.jl](https://github.com/mauro3/Parameters.jl) focuses on keyword constructors and `@unpack` for numerical model parameters.
-`Base.@kwdef` covers the common case (defaults + keyword constructors) with no extra dependencies.
+To make the difference concrete, here is the same type hierarchy defined with each package — an abstract `Animal` with a `Cat` (default `lives=9`) and a `Dog`:
+
+**Terse.jl — 4 lines**
+```julia
+@types Animal > (
+    Cat(lives::Int = 9),
+    Dog(name::String)
+)
+```
+
+**[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) — 3 lines** *(one type at a time; no hierarchy macro)*
+```julia
+abstract type Animal end
+@qstruct Cat(lives::Int = 9) <: Animal
+@qstruct Dog(name::String) <: Animal
+```
+
+**[Parameters.jl](https://github.com/mauro3/Parameters.jl) — 8 lines** *(block syntax; `@with_kw` only needed for types with defaults)*
+```julia
+abstract type Animal end
+@with_kw struct Cat <: Animal
+    lives::Int = 9
+end
+struct Dog <: Animal
+    name::String
+end
+```
+
+**`Base.@kwdef` — 8 lines** *(no extra dependencies; block syntax)*
+```julia
+abstract type Animal end
+Base.@kwdef struct Cat <: Animal
+    lives::Int = 9
+end
+struct Dog <: Animal
+    name::String
+end
+```
