@@ -61,6 +61,22 @@ using Terse
 @types Wrapper{T}(value::T) <: Animal{T}
 ```
 
+**Per-type mutability and const fields:**
+
+Use `@mutable` to mark individual subtypes as mutable, and `@const(field)` to freeze
+specific fields within a mutable type (requires Julia 1.8+, explicit parentheses required):
+
+```julia
+@types Animal > (
+    Cat(lives::Int = 9),
+    @mutable Dog(@const(name::String), legs::Int)
+)
+
+d = Dog("Rex", 4)
+d.legs = 3        # ok — legs is mutable
+d.name = "Spot"   # error — name is const
+```
+
 ## Comparison with Similar Packages
 
 | Feature | `Base.@kwdef` | [QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) | [Parameters.jl](https://github.com/mauro3/Parameters.jl) | [ConcreteStructs.jl](https://github.com/SciML/ConcreteStructs.jl) | **Terse.jl** |
@@ -73,10 +89,12 @@ using Terse
 | Define abstract supertypes | | | | | ✓ |
 | Full type hierarchy in one expression | | | | | ✓ |
 | Nested abstract hierarchies | | | | | ✓ |
+| Per-type mutability | | | | | ✓ |
+| Const fields (Julia 1.8+) | | | | | ✓ |
 | Source lines | — | ~540 | ~670 | ~245 | ~175 |
 | Dependencies | — | ConstructionBase, MacroTools | OrderedCollections, UnPack | none | none |
 
-To make the difference concrete, here is the same type hierarchy defined with each package — an abstract `Animal` with a `Cat` (default `lives=9`) and a `Dog`:
+To make the difference concrete, here is the same type hierarchy defined with each package — an abstract `Animal` with a `Cat` (default `lives=9`) and a mutable `Dog` with a const `name` field:
 
 **Terse.jl — 4 lines**
 ```julia
@@ -85,6 +103,8 @@ To make the difference concrete, here is the same type hierarchy defined with ea
     @mutable Dog(@const(name::String), legs::Int)
 )
 ```
+
+No other package in this comparison can express per-type mutability or const fields within a hierarchy definition.
 
 **[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) — 3 lines** *(one type at a time; no hierarchy macro)*
 ```julia
