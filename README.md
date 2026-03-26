@@ -18,7 +18,11 @@ using Terse
     ),
     @mutable ThreeDimensional > (
         Sphere(@const(radius::Float64); hollow::Bool = false),
-        Cube(@const(side::Float64); hollow::Bool = false)
+        Cube(@const(side::Float64); hollow::Bool = false),
+        Prism > (
+            TriangularPrism(base::Float64, height::Float64),
+            Cylinder(radius::Float64 = 1.0; height::Float64 = 1.0)
+        )
     )
 )
 
