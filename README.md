@@ -4,18 +4,34 @@
 
 Terse.jl provides the `@types` macro for defining type hierarchies concisely.
 
-## Installation
-
-```julia
-using Pkg
-Pkg.add("Terse")
-```
 
 ## Usage
 
 ```julia
 using Terse
+
+@types Shape > (
+    TwoDimensional > (
+        Circle(radius::Float64 = 1.0),
+        Rectangle(width::Float64 = 1.0, height::Float64 = 1.0),
+        Triangle(base::Float64, height::Float64)
+    ),
+    @mutable ThreeDimensional > (
+        Sphere(@const(radius::Float64); hollow::Bool = false),
+        Cube(@const(side::Float64); hollow::Bool = false)
+    )
+)
+
+Circle()             # Circle(1.0)           — default radius
+Rectangle(2.0)       # Rectangle(2.0, 1.0)   — default height
+Triangle(3.0, 4.0)   # Triangle(3.0, 4.0)
+
+s = Sphere(5.0)
+s.hollow = true      # mutable field
+s.radius = 1.0       # ERROR: const field
 ```
+
+---
 
 **Standalone abstract type:**
 
