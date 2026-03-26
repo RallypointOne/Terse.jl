@@ -73,6 +73,7 @@ using Terse
 | Define abstract supertypes | | | | | ✓ |
 | Full type hierarchy in one expression | | | | | ✓ |
 | Nested abstract hierarchies | | | | | ✓ |
+| Source lines | — | ~540 | ~670 | ~245 | ~175 |
 
 To make the difference concrete, here is the same type hierarchy defined with each package — an abstract `Animal` with a `Cat` (default `lives=9`) and a `Dog`:
 
