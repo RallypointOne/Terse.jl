@@ -1,6 +1,6 @@
 module Terse
 
-export @types, @show_types, @mutable
+export @types, @show_types
 
 import InteractiveUtils: subtypes
 
@@ -301,24 +301,5 @@ macro show_types(T)
     :(println(_show_types_str($(esc(T)))))
 end
 
-#-----------------------------------------------------------------------------# @mutable
-"""
-    @mutable SubType(fields...)
-
-Mark an individual subtype as mutable within a [`@types`](@ref) hierarchy.
-Can only be used inside `@types`.
-
-### Examples
-
-```julia
-@types Animal > (
-    Cat(lives::Int),
-    @mutable Dog(@const(name::String), legs::Int)
-)
-```
-"""
-macro mutable(ex)
-    error("@mutable can only be used inside @types")
-end
 
 end # module
