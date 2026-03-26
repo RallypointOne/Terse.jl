@@ -4,6 +4,9 @@ export @types, @show_types
 
 import InteractiveUtils: subtypes
 
+const _MUTABLE_SYM = Symbol("@mutable")
+const _CONST_SYM   = Symbol("@const")
+
 #-----------------------------------------------------------------------------# @show_types helpers
 function _st_typevar_str(tv::TypeVar)
     tv.ub === Any && return string(tv.name)
@@ -22,8 +25,8 @@ end
 function _st_type_sig(T)
     params, body = _st_split(T)
     name = string(nameof(body))
-    isempty(params) && return name
-    return name * "{" * join(_st_typevar_str.(params), ", ") * "}"
+    isempty(params) && return name, body
+    return name * "{" * join(_st_typevar_str.(params), ", ") * "}", body
 end
 
 function _st_field_str(fname, ftype)
@@ -33,8 +36,7 @@ end
 
 function _st_concrete_str(T, indent=0; show_mutable=false)
     pad = "    " ^ indent
-    sig = _st_type_sig(T)
-    _, body = _st_split(T)
+    sig, body = _st_type_sig(T)
     fnames = fieldnames(body)
     is_mut = ismutabletype(body)
     prefix = (show_mutable && is_mut) ? "@mutable " : ""
@@ -56,10 +58,10 @@ end
 
 function _st_impl(T, indent=0; all_mutable=false)
     pad = "    " ^ indent
-    sig = _st_type_sig(T)
-    subs = subtypes(T)
-    isempty(subs) && return pad * sig
-    sub_strs = map(subs) do S
+    sig, _ = _st_type_sig(T)
+    children = subtypes(T)
+    isempty(children) && return pad * sig
+    sub_strs = map(children) do S
         isabstracttype(S) ? _st_impl(S, indent + 1; all_mutable) :
             _st_concrete_str(S, indent + 1; show_mutable=!all_mutable)
     end
@@ -80,7 +82,7 @@ function _show_types_str(T)
 end
 
 #-----------------------------------------------------------------------------# @types helpers
-_is_const_field(f) = Meta.isexpr(f, :macrocall) && f.args[1] == Symbol("@const")
+_is_const_field(f) = Meta.isexpr(f, :macrocall) && f.args[1] === _CONST_SYM
 _unwrap_const(f)   = _is_const_field(f) ? f.args[end] : f
 
 function _to_struct_field(f)
@@ -107,19 +109,20 @@ function _terse_parse_subtype(ex)
     end
 end
 
-# Extract the base constructor name from a struct sig (strips <: and curly).
-function _ctor_name(sig)
-    sig = Meta.isexpr(sig, :<:) ? sig.args[1] : sig
-    Meta.isexpr(sig, :curly) ? sig.args[1] : sig
-end
+_ctor_name(sig) = Meta.isexpr(sig, :<:) ? _ctor_name(sig.args[1]) : (Meta.isexpr(sig, :curly) ? sig.args[1] : sig)
 
-# Strip default from a field declaration: Expr(:kw, field, default) → field
 _plain(f) = Meta.isexpr(f, :kw) ? f.args[1] : f
 
-# Extract field name from a plain field: Expr(:(::), name, type) → name, or bare Symbol
 _fname(f) = Meta.isexpr(f, :(::)) ? f.args[1] : f
 
-# Build a struct Expr, generating inner constructors when defaults or keyword args are present.
+_build_curly(name, params) = isempty(params) ? name : Expr(:curly, name, params...)
+
+# If the expression is a `@mutable` macrocall, set flag and unwrap.
+function _unwrap_mutable(is_mutable, ex)
+    Meta.isexpr(ex, :macrocall) && ex.args[1] === _MUTABLE_SYM || return is_mutable, ex
+    return true, ex.args[end]
+end
+
 function _make_struct(is_mutable, sig, pos_fields, kw_fields=Any[])
     has_const = any(_is_const_field, pos_fields) || any(_is_const_field, kw_fields)
     has_const && !is_mutable &&
@@ -128,63 +131,50 @@ function _make_struct(is_mutable, sig, pos_fields, kw_fields=Any[])
     has_pos_defaults = any(f -> Meta.isexpr(_unwrap_const(f), :kw), pos_fields)
     has_explicit_kw  = !isempty(kw_fields)
 
-    plain_pos = map(f -> _plain(_unwrap_const(f)), pos_fields)
-    plain_kw  = map(f -> _plain(_unwrap_const(f)), kw_fields)
-    all_plain = [plain_pos; plain_kw]
-    all_names = map(_fname, all_plain)
-    ctor      = _ctor_name(sig)
-
+    plain_pos  = map(f -> _plain(_unwrap_const(f)), pos_fields)
+    plain_kw   = map(f -> _plain(_unwrap_const(f)), kw_fields)
+    all_names  = map(_fname, [plain_pos; plain_kw])
+    ctor       = _ctor_name(sig)
     struct_pos = map(_to_struct_field, pos_fields)
     struct_kw  = map(_to_struct_field, kw_fields)
 
-    # No defaults, no explicit keyword section → plain struct, no inner constructor
     !has_pos_defaults && !has_explicit_kw &&
         return Expr(:struct, is_mutable, sig, Expr(:block, struct_pos...))
 
+    new_call = Expr(:call, :new, all_names...)
     if has_explicit_kw
         ctor_def = Expr(:(=),
             Expr(:call, ctor, Expr(:parameters, map(_unwrap_const, kw_fields)...), map(_unwrap_const, pos_fields)...),
-            Expr(:call, :new, all_names...))
+            new_call)
         return Expr(:struct, is_mutable, sig, Expr(:block, [struct_pos; struct_kw]..., ctor_def))
     else
         required = filter(f -> !Meta.isexpr(_unwrap_const(f), :kw), pos_fields)
         optional = filter(f ->  Meta.isexpr(_unwrap_const(f), :kw), pos_fields)
-        pos_ctor = Expr(:(=),
-            Expr(:call, ctor, map(_unwrap_const, pos_fields)...),
-            Expr(:call, :new, all_names...))
+        pos_ctor = Expr(:(=), Expr(:call, ctor, map(_unwrap_const, pos_fields)...), new_call)
         kw_ctor  = Expr(:(=),
             Expr(:call, ctor, Expr(:parameters, map(_unwrap_const, optional)...), map(_unwrap_const, required)...),
-            Expr(:call, :new, all_names...))
+            new_call)
         return Expr(:struct, is_mutable, sig, Expr(:block, struct_pos..., pos_ctor, kw_ctor))
     end
 end
 
-# Recursively build declarations for a type hierarchy.
 function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing; is_mutable=false)
     abstract_name, abstract_params = _terse_parse_type(abstract_expr)
-    abstract_head = isempty(abstract_params) ? abstract_name : Expr(:curly, abstract_name, abstract_params...)
+    abstract_head = _build_curly(abstract_name, abstract_params)
+    abstract_decl = Expr(:abstract, parent_head === nothing ? abstract_head : Expr(:<:, abstract_head, parent_head))
 
-    abstract_body = parent_head === nothing ? abstract_head : Expr(:<:, abstract_head, parent_head)
-    abstract_decl = Expr(:abstract, abstract_body)
+    children = Meta.isexpr(subtypes_expr, :tuple) ? subtypes_expr.args : [subtypes_expr]
 
-    subtypes = Meta.isexpr(subtypes_expr, :tuple) ? subtypes_expr.args : [subtypes_expr]
-
-    decls = map(subtypes) do st
-        local_mutable = is_mutable
-        if Meta.isexpr(st, :macrocall) && st.args[1] == Symbol("@mutable")
-            local_mutable = true
-            st = st.args[end]
-        end
+    decls = map(children) do st
+        local_mutable, st = _unwrap_mutable(is_mutable, st)
 
         if Meta.isexpr(st, :call) && st.args[1] == :>
             _types_impl(st.args[2], st.args[3], abstract_head; is_mutable=local_mutable)
         elseif st isa Symbol
-            sig = isempty(abstract_params) ? st : Expr(:curly, st, abstract_params...)
-            _make_struct(local_mutable, Expr(:<:, sig, abstract_head), Any[])
+            _make_struct(local_mutable, Expr(:<:, _build_curly(st, abstract_params), abstract_head), Any[])
         else
             name, params, pos_fields, kw_fields = _terse_parse_subtype(st)
-            sig = isempty(params) ? name : Expr(:curly, name, params...)
-            _make_struct(local_mutable, Expr(:<:, sig, abstract_head), pos_fields, kw_fields)
+            _make_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), pos_fields, kw_fields)
         end
     end
 
@@ -192,22 +182,16 @@ function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing; is_mutab
 end
 
 function _types_single(is_mutable, ex)
-    if Meta.isexpr(ex, :macrocall) && ex.args[1] == Symbol("@mutable")
-        is_mutable = true
-        ex = ex.args[end]
-    end
+    is_mutable, ex = _unwrap_mutable(is_mutable, ex)
     if ex isa Symbol || Meta.isexpr(ex, :curly)
         abstract_name, abstract_params = _terse_parse_type(ex)
-        abstract_head = isempty(abstract_params) ? abstract_name : Expr(:curly, abstract_name, abstract_params...)
-        return Expr(:abstract, abstract_head)
+        return Expr(:abstract, _build_curly(abstract_name, abstract_params))
     elseif Meta.isexpr(ex, :call) && ex.args[1] != :>
         name, params, pos_fields, kw_fields = _terse_parse_subtype(ex)
-        sig = isempty(params) ? name : Expr(:curly, name, params...)
-        return _make_struct(is_mutable, sig, pos_fields, kw_fields)
+        return _make_struct(is_mutable, _build_curly(name, params), pos_fields, kw_fields)
     elseif Meta.isexpr(ex, :<:)
         name, params, pos_fields, kw_fields = _terse_parse_subtype(ex.args[1])
-        sig = isempty(params) ? name : Expr(:curly, name, params...)
-        return _make_struct(is_mutable, Expr(:<:, sig, ex.args[2]), pos_fields, kw_fields)
+        return _make_struct(is_mutable, Expr(:<:, _build_curly(name, params), ex.args[2]), pos_fields, kw_fields)
     elseif Meta.isexpr(ex, :call) && ex.args[1] == :>
         return _types_impl(ex.args[2], ex.args[3]; is_mutable)
     end
