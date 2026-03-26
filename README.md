@@ -1,7 +1,4 @@
 [![CI](https://github.com/RallypointOne/Terse.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/RallypointOne/Terse.jl/actions/workflows/CI.yml)
-[![Docs Build](https://github.com/RallypointOne/Terse.jl/actions/workflows/Docs.yml/badge.svg)](https://github.com/RallypointOne/Terse.jl/actions/workflows/Docs.yml)
-[![Stable Docs](https://img.shields.io/badge/docs-stable-blue)](https://RallypointOne.github.io/Terse.jl/stable/)
-[![Dev Docs](https://img.shields.io/badge/docs-dev-blue)](https://RallypointOne.github.io/Terse.jl/dev/)
 
 # Terse.jl
 
@@ -63,3 +60,21 @@ using Terse
 
 @types Wrapper{T}(value::T) <: Animal{T}
 ```
+
+## Comparison with Similar Packages
+
+| Feature | `Base.@kwdef` | [QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) | [Parameters.jl](https://github.com/mauro3/Parameters.jl) | [ConcreteStructs.jl](https://github.com/SciML/ConcreteStructs.jl) | **Terse.jl** |
+|---|:---:|:---:|:---:|:---:|:---:|
+| Concise one-liner syntax | | ✓ | | ✓ | ✓ |
+| Default field values | ✓ | ✓ | ✓ | | ✓ |
+| Keyword constructors | ✓ | ✓ | ✓ | | ✓ |
+| Mutable structs | ✓ | ✓ | | ✓ | ✓ |
+| Parametric types | ✓ | ✓ | ✓ | ✓ (auto-inferred) | ✓ |
+| Define abstract supertypes | | | | | ✓ |
+| Full type hierarchy in one expression | | | | | ✓ |
+| Nested abstract hierarchies | | | | | ✓ |
+
+The key differentiator: `@types` lets you define an entire abstract type tree — with concrete leaf types, default values, and keyword constructors — in a single expression.
+[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) is the closest alternative for concise struct syntax but only defines one concrete type at a time with no hierarchy support.
+[Parameters.jl](https://github.com/mauro3/Parameters.jl) focuses on keyword constructors and `@unpack` for numerical model parameters.
+`Base.@kwdef` covers the common case (defaults + keyword constructors) with no extra dependencies.
