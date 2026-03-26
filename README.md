@@ -94,13 +94,13 @@ d.name = "Spot"   # error — name is const
 | Source lines | — | ~540 | ~670 | ~245 | ~175 |
 | Dependencies | — | ConstructionBase, MacroTools | OrderedCollections, UnPack | none | none |
 
-To make the difference concrete, here is the same type hierarchy defined with each package — an abstract `Animal` with a `Cat` (default `lives=9`) and a mutable `Dog` with a const `name` field:
+Concrete example: an abstract `Animal` with a `Cat` (default `lives=9`) and a mutable `Dog` with a const `name` field:
 
 **Terse.jl**
 ```julia
 @types Animal > (
     Cat(lives::Int = 9),
-    @mutable Dog(@const(name::String), pointy_ears::Bool)
+    @mutable Dog(@const(name::String); pointy_ears::Bool = true)
 )
 ```
 
@@ -111,6 +111,7 @@ abstract type Animal end
 mutable struct Dog <: Animal
     const name::String
     pointy_ears::Bool
+    Dog(name::String; pointy_ears::Bool = true) = new(name, pointy_ears)
 end
 ```
 
@@ -123,6 +124,7 @@ end
 mutable struct Dog <: Animal
     const name::String
     pointy_ears::Bool
+    Dog(name::String; pointy_ears::Bool = true) = new(name, pointy_ears)
 end
 ```
 
@@ -135,5 +137,6 @@ end
 mutable struct Dog <: Animal
     const name::String
     pointy_ears::Bool
+    Dog(name::String; pointy_ears::Bool = true) = new(name, pointy_ears)
 end
 ```
