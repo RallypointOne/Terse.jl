@@ -100,37 +100,42 @@ To make the difference concrete, here is the same type hierarchy defined with ea
 ```julia
 @types Animal > (
     Cat(lives::Int = 9),
-    @mutable Dog(@const(name::String), legs::Int)
+    @mutable Dog(@const(name::String), pointy_ears::Bool)
 )
 ```
 
 No other package in this comparison can express per-type mutability or const fields within a hierarchy definition.
 
-**[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) — 3 lines** *(one type at a time; no hierarchy macro)*
+**[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) — 6 lines** *(one type at a time; `@qmutable` has no const field support, falls back to plain Julia)*
 ```julia
 abstract type Animal end
 @qstruct Cat(lives::Int = 9) <: Animal
-@qstruct Dog(name::String) <: Animal
+mutable struct Dog <: Animal
+    const name::String
+    pointy_ears::Bool
+end
 ```
 
-**[Parameters.jl](https://github.com/mauro3/Parameters.jl) — 8 lines** *(block syntax; `@with_kw` only needed for types with defaults)*
+**[Parameters.jl](https://github.com/mauro3/Parameters.jl) — 9 lines** *(block syntax; no const field support in `@with_kw`, falls back to plain Julia)*
 ```julia
 abstract type Animal end
 @with_kw struct Cat <: Animal
     lives::Int = 9
 end
-struct Dog <: Animal
-    name::String
+mutable struct Dog <: Animal
+    const name::String
+    pointy_ears::Bool
 end
 ```
 
-**`Base.@kwdef` — 8 lines** *(no extra dependencies; block syntax)*
+**`Base.@kwdef` — 9 lines** *(no extra dependencies; no const field support in `@kwdef`, falls back to plain Julia)*
 ```julia
 abstract type Animal end
 Base.@kwdef struct Cat <: Animal
     lives::Int = 9
 end
-struct Dog <: Animal
-    name::String
+mutable struct Dog <: Animal
+    const name::String
+    pointy_ears::Bool
 end
 ```
