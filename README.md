@@ -96,7 +96,7 @@ d.name = "Spot"   # error — name is const
 
 To make the difference concrete, here is the same type hierarchy defined with each package — an abstract `Animal` with a `Cat` (default `lives=9`) and a mutable `Dog` with a const `name` field:
 
-**Terse.jl — 4 lines**
+**Terse.jl**
 ```julia
 @types Animal > (
     Cat(lives::Int = 9),
@@ -104,7 +104,7 @@ To make the difference concrete, here is the same type hierarchy defined with ea
 )
 ```
 
-**[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) — 6 lines** *(one type at a time; `@qmutable` has no const field support, falls back to plain Julia)*
+**[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl)** *(one type at a time; `@qmutable` has no const field support, falls back to plain Julia)*
 ```julia
 abstract type Animal end
 @qstruct Cat(lives::Int = 9) <: Animal
@@ -114,7 +114,7 @@ mutable struct Dog <: Animal
 end
 ```
 
-**[Parameters.jl](https://github.com/mauro3/Parameters.jl) — 9 lines** *(block syntax; no const field support in `@with_kw`, falls back to plain Julia)*
+**[Parameters.jl](https://github.com/mauro3/Parameters.jl)** *(block syntax; no const field support in `@with_kw`, falls back to plain Julia)*
 ```julia
 abstract type Animal end
 @with_kw struct Cat <: Animal
@@ -126,7 +126,7 @@ mutable struct Dog <: Animal
 end
 ```
 
-**`Base.@kwdef` — 9 lines** *(no extra dependencies; no const field support in `@kwdef`, falls back to plain Julia)*
+**`Base.@kwdef`** *(no extra dependencies; no const field support in `@kwdef`, falls back to plain Julia)*
 ```julia
 abstract type Animal end
 Base.@kwdef struct Cat <: Animal
