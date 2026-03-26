@@ -143,6 +143,35 @@ using Test
         @test_throws TypeError Labelled{Int, Int}(1, 2)  # S must be <: AbstractString
     end
 
+    @testset "@mutable per-subtype" begin
+        @types MixedAnimal > (
+            MixedCat(lives::Int),
+            @mutable MixedDog(name::String)
+        )
+        @test !ismutabletype(MixedCat)
+        @test  ismutabletype(MixedDog)
+        @test supertype(MixedCat) === MixedAnimal
+        @test supertype(MixedDog) === MixedAnimal
+        d = MixedDog("Rex")
+        d.name = "Spot"
+        @test d.name == "Spot"
+    end
+
+    @testset "@const fields" begin
+        @types ConstAnimal > (
+            ConstCat(lives::Int),
+            @mutable ConstDog(@const(name::String), legs::Int)
+        )
+        @test !ismutabletype(ConstCat)
+        @test  ismutabletype(ConstDog)
+        @test Base.isconst(ConstDog, :name)
+        @test !Base.isconst(ConstDog, :legs)
+        d = ConstDog("Rex", 4)
+        d.legs = 3
+        @test d.legs == 3
+        @test_throws ErrorException (d.name = "Spot")
+    end
+
     @testset "@show_types" begin
         @types STAnimal > (
             STCat(lives::Int),
@@ -173,6 +202,15 @@ using Test
         # Mutable types get "mutable " prefix
         @types mutable STMVehicle > (STMCar(doors::Int), STMBike(gears::Int))
         @test startswith(Terse._show_types_str(STMVehicle), "mutable ")
+
+        # Mixed mutability: @mutable subtypes get @mutable prefix, const fields get @const(...)
+        @types STMixed > (
+            STMixedA(x::Int),
+            @mutable STMixedB(@const(name::String), y::Int)
+        )
+        s4 = Terse._show_types_str(STMixed)
+        @test occursin("STMixedA(x::Int64)", s4)
+        @test occursin("@mutable STMixedB(@const(name::String), y::Int64)", s4)
 
         # Parametric types show TypeVar names
         @types STContainer{T} > (

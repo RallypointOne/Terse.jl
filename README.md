@@ -82,7 +82,7 @@ To make the difference concrete, here is the same type hierarchy defined with ea
 ```julia
 @types Animal > (
     Cat(lives::Int = 9),
-    Dog(name::String)
+    @mutable Dog(@const(name::String), legs::Int)
 )
 ```
 

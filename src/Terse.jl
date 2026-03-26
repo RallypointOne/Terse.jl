@@ -1,6 +1,6 @@
 module Terse
 
-export @types, @show_types
+export @types, @show_types, @mutable
 
 import InteractiveUtils: subtypes
 
@@ -31,14 +31,19 @@ function _st_field_str(fname, ftype)
     return string(fname) * "::" * string(ftype)
 end
 
-function _st_concrete_str(T, indent=0)
+function _st_concrete_str(T, indent=0; show_mutable=false)
     pad = "    " ^ indent
     sig = _st_type_sig(T)
     _, body = _st_split(T)
     fnames = fieldnames(body)
-    isempty(fnames) && return pad * sig
-    fields = join([_st_field_str(n, t) for (n, t) in zip(fnames, body.types)], ", ")
-    return pad * sig * "(" * fields * ")"
+    is_mut = ismutabletype(body)
+    prefix = (show_mutable && is_mut) ? "@mutable " : ""
+    isempty(fnames) && return pad * prefix * sig
+    fields = map(zip(fnames, body.types)) do (n, t)
+        s = _st_field_str(n, t)
+        (is_mut && Base.isconst(body, n)) ? "@const(" * s * ")" : s
+    end
+    return pad * prefix * sig * "(" * join(fields, ", ") * ")"
 end
 
 function _st_leaves(T)
@@ -49,13 +54,14 @@ function _st_leaves(T)
     return result
 end
 
-function _st_impl(T, indent=0)
+function _st_impl(T, indent=0; all_mutable=false)
     pad = "    " ^ indent
     sig = _st_type_sig(T)
     subs = subtypes(T)
     isempty(subs) && return pad * sig
     sub_strs = map(subs) do S
-        isabstracttype(S) ? _st_impl(S, indent + 1) : _st_concrete_str(S, indent + 1)
+        isabstracttype(S) ? _st_impl(S, indent + 1; all_mutable) :
+            _st_concrete_str(S, indent + 1; show_mutable=!all_mutable)
     end
     return pad * sig * " > (\n" * join(sub_strs, ",\n") * "\n" * pad * ")"
 end
@@ -63,15 +69,25 @@ end
 function _show_types_str(T)
     if isabstracttype(T)
         leaves = _st_leaves(T)
-        prefix = !isempty(leaves) && all(ismutabletype, leaves) ? "mutable " : ""
-        return prefix * _st_impl(T)
+        all_mut = !isempty(leaves) && all(ismutabletype, leaves)
+        prefix = all_mut ? "mutable " : ""
+        return prefix * _st_impl(T; all_mutable=all_mut)
     else
-        prefix = ismutabletype(T) ? "mutable " : ""
+        _, body = _st_split(T)
+        prefix = ismutabletype(body) ? "mutable " : ""
         return prefix * _st_concrete_str(T)
     end
 end
 
 #-----------------------------------------------------------------------------# @types helpers
+_is_const_field(f) = Meta.isexpr(f, :macrocall) && f.args[1] == Symbol("@const")
+_unwrap_const(f)   = _is_const_field(f) ? f.args[end] : f
+
+function _to_struct_field(f)
+    _is_const_field(f) && return Expr(:const, _plain(f.args[end]))
+    return _plain(f)
+end
+
 function _terse_parse_type(ex)
     ex isa Symbol && return ex, Any[]
     Meta.isexpr(ex, :curly) && return ex.args[1], ex.args[2:end]
@@ -105,39 +121,41 @@ _fname(f) = Meta.isexpr(f, :(::)) ? f.args[1] : f
 
 # Build a struct Expr, generating inner constructors when defaults or keyword args are present.
 function _make_struct(is_mutable, sig, pos_fields, kw_fields=Any[])
-    has_pos_defaults = any(f -> Meta.isexpr(f, :kw), pos_fields)
+    has_const = any(_is_const_field, pos_fields) || any(_is_const_field, kw_fields)
+    has_const && !is_mutable &&
+        error("@types: @const fields are only valid inside a @mutable (or `@types mutable`) type")
+
+    has_pos_defaults = any(f -> Meta.isexpr(_unwrap_const(f), :kw), pos_fields)
     has_explicit_kw  = !isempty(kw_fields)
 
-    plain_pos = map(_plain, pos_fields)
-    plain_kw  = map(_plain, kw_fields)
+    plain_pos = map(f -> _plain(_unwrap_const(f)), pos_fields)
+    plain_kw  = map(f -> _plain(_unwrap_const(f)), kw_fields)
     all_plain = [plain_pos; plain_kw]
-
-    # No defaults, no explicit keyword section → plain struct, no inner constructor
-    !has_pos_defaults && !has_explicit_kw &&
-        return Expr(:struct, is_mutable, sig, Expr(:block, pos_fields...))
-
     all_names = map(_fname, all_plain)
     ctor      = _ctor_name(sig)
 
+    struct_pos = map(_to_struct_field, pos_fields)
+    struct_kw  = map(_to_struct_field, kw_fields)
+
+    # No defaults, no explicit keyword section → plain struct, no inner constructor
+    !has_pos_defaults && !has_explicit_kw &&
+        return Expr(:struct, is_mutable, sig, Expr(:block, struct_pos...))
+
     if has_explicit_kw
-        # User separated positional and keyword args with ;
-        # Generate one constructor mirroring the user's intent exactly.
         ctor_def = Expr(:(=),
-            Expr(:call, ctor, Expr(:parameters, kw_fields...), pos_fields...),
+            Expr(:call, ctor, Expr(:parameters, map(_unwrap_const, kw_fields)...), map(_unwrap_const, pos_fields)...),
             Expr(:call, :new, all_names...))
-        return Expr(:struct, is_mutable, sig, Expr(:block, all_plain..., ctor_def))
+        return Expr(:struct, is_mutable, sig, Expr(:block, [struct_pos; struct_kw]..., ctor_def))
     else
-        # All fields positional, some with defaults.
-        # Generate both a positional-with-defaults and a keyword-only constructor.
-        required = filter(f -> !Meta.isexpr(f, :kw), pos_fields)
-        optional = filter(f ->  Meta.isexpr(f, :kw), pos_fields)
+        required = filter(f -> !Meta.isexpr(_unwrap_const(f), :kw), pos_fields)
+        optional = filter(f ->  Meta.isexpr(_unwrap_const(f), :kw), pos_fields)
         pos_ctor = Expr(:(=),
-            Expr(:call, ctor, pos_fields...),
+            Expr(:call, ctor, map(_unwrap_const, pos_fields)...),
             Expr(:call, :new, all_names...))
         kw_ctor  = Expr(:(=),
-            Expr(:call, ctor, Expr(:parameters, optional...), required...),
+            Expr(:call, ctor, Expr(:parameters, map(_unwrap_const, optional)...), map(_unwrap_const, required)...),
             Expr(:call, :new, all_names...))
-        return Expr(:struct, is_mutable, sig, Expr(:block, all_plain..., pos_ctor, kw_ctor))
+        return Expr(:struct, is_mutable, sig, Expr(:block, struct_pos..., pos_ctor, kw_ctor))
     end
 end
 
@@ -152,15 +170,21 @@ function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing; is_mutab
     subtypes = Meta.isexpr(subtypes_expr, :tuple) ? subtypes_expr.args : [subtypes_expr]
 
     decls = map(subtypes) do st
+        local_mutable = is_mutable
+        if Meta.isexpr(st, :macrocall) && st.args[1] == Symbol("@mutable")
+            local_mutable = true
+            st = st.args[end]
+        end
+
         if Meta.isexpr(st, :call) && st.args[1] == :>
-            _types_impl(st.args[2], st.args[3], abstract_head; is_mutable)
+            _types_impl(st.args[2], st.args[3], abstract_head; is_mutable=local_mutable)
         elseif st isa Symbol
             sig = isempty(abstract_params) ? st : Expr(:curly, st, abstract_params...)
-            _make_struct(is_mutable, Expr(:<:, sig, abstract_head), Any[])
+            _make_struct(local_mutable, Expr(:<:, sig, abstract_head), Any[])
         else
             name, params, pos_fields, kw_fields = _terse_parse_subtype(st)
             sig = isempty(params) ? name : Expr(:curly, name, params...)
-            _make_struct(is_mutable, Expr(:<:, sig, abstract_head), pos_fields, kw_fields)
+            _make_struct(local_mutable, Expr(:<:, sig, abstract_head), pos_fields, kw_fields)
         end
     end
 
@@ -168,6 +192,10 @@ function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing; is_mutab
 end
 
 function _types_single(is_mutable, ex)
+    if Meta.isexpr(ex, :macrocall) && ex.args[1] == Symbol("@mutable")
+        is_mutable = true
+        ex = ex.args[end]
+    end
     if ex isa Symbol || Meta.isexpr(ex, :curly)
         abstract_name, abstract_params = _terse_parse_type(ex)
         abstract_head = isempty(abstract_params) ? abstract_name : Expr(:curly, abstract_name, abstract_params...)
@@ -197,6 +225,8 @@ end
 Define abstract types, concrete structs, or full type hierarchies in one expression.
 
 - `mutable` makes all generated concrete structs mutable.
+- `@mutable SubType(...)` makes an individual subtype mutable within a hierarchy.
+- `@const(field::T)` marks a field as const within a `@mutable` or `mutable` type.
 - Fields with default values (`field::T = val`) generate inner constructors for both
   positional-with-defaults and keyword argument construction.
 - Use `;` to separate positional fields from keyword-only fields, generating a single
@@ -220,6 +250,11 @@ Define abstract types, concrete structs, or full type hierarchies in one express
 @types Animal > (
     Cat(lives::Int),
     Dog(name::String)
+)
+
+@types Animal > (
+    Cat(lives::Int = 9),
+    @mutable Dog(@const(name::String), legs::Int)
 )
 
 @types Animal{T} > (
@@ -264,6 +299,26 @@ Display the type hierarchy rooted at `T` in `@types` syntax.
 """
 macro show_types(T)
     :(println(_show_types_str($(esc(T)))))
+end
+
+#-----------------------------------------------------------------------------# @mutable
+"""
+    @mutable SubType(fields...)
+
+Mark an individual subtype as mutable within a [`@types`](@ref) hierarchy.
+Can only be used inside `@types`.
+
+### Examples
+
+```julia
+@types Animal > (
+    Cat(lives::Int),
+    @mutable Dog(@const(name::String), legs::Int)
+)
+```
+"""
+macro mutable(ex)
+    error("@mutable can only be used inside @types")
 end
 
 end # module
