@@ -104,9 +104,6 @@ To make the difference concrete, here is the same type hierarchy defined with ea
 )
 ```
 
-> [!IMPORTANT]
-> No other package in this comparison can express per-type mutability or const fields within a hierarchy definition.
-
 **[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) — 6 lines** *(one type at a time; `@qmutable` has no const field support, falls back to plain Julia)*
 ```julia
 abstract type Animal end
