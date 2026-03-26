@@ -142,4 +142,46 @@ using Test
         @test Labelled{Int, String}(1, "hello") isa Wrapper{Int}
         @test_throws TypeError Labelled{Int, Int}(1, 2)  # S must be <: AbstractString
     end
+
+    @testset "@show_types" begin
+        @types STAnimal > (
+            STCat(lives::Int),
+            STDog(name::String)
+        )
+        s = Terse._show_types_str(STAnimal)
+        @test s == "STAnimal > (\n    STCat(lives::Int64),\n    STDog(name::String)\n)"
+
+        # Nested hierarchy
+        @types STVehicle > (
+            STCar(doors::Int),
+            STMotored > (
+                STTruck(payload::Float64),
+                STBus(seats::Int)
+            )
+        )
+        s2 = Terse._show_types_str(STVehicle)
+        @test occursin("STVehicle > (", s2)
+        @test occursin("    STCar(doors::Int64)", s2)
+        @test occursin("    STMotored > (", s2)
+        @test occursin("        STTruck(payload::Float64)", s2)
+        @test occursin("        STBus(seats::Int64)", s2)
+
+        # Single concrete type
+        @types STPoint(x::Float64, y::Float64)
+        @test Terse._show_types_str(STPoint) == "STPoint(x::Float64, y::Float64)"
+
+        # Mutable types get "mutable " prefix
+        @types mutable STMVehicle > (STMCar(doors::Int), STMBike(gears::Int))
+        @test startswith(Terse._show_types_str(STMVehicle), "mutable ")
+
+        # Parametric types show TypeVar names
+        @types STContainer{T} > (
+            STBox{T}(value::T),
+            STTagged{T, S <: AbstractString}(value::T, tag::S)
+        )
+        s3 = Terse._show_types_str(STContainer)
+        @test occursin("STContainer{T}", s3)
+        @test occursin("STBox{T}(value::T)", s3)
+        @test occursin("STTagged{T, S <: AbstractString}(value::T, tag::S)", s3)
+    end
 end

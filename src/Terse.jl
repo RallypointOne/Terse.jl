@@ -1,6 +1,75 @@
 module Terse
 
-export @types
+export @types, @show_types
+
+import InteractiveUtils: subtypes
+
+#-----------------------------------------------------------------------------# @show_types helpers
+function _st_typevar_str(tv::TypeVar)
+    tv.ub === Any && return string(tv.name)
+    return string(tv.name) * " <: " * string(tv.ub)
+end
+
+function _st_split(T)
+    params = TypeVar[]
+    while T isa UnionAll
+        push!(params, T.var)
+        T = T.body
+    end
+    return params, T
+end
+
+function _st_type_sig(T)
+    params, body = _st_split(T)
+    name = string(nameof(body))
+    isempty(params) && return name
+    return name * "{" * join(_st_typevar_str.(params), ", ") * "}"
+end
+
+function _st_field_str(fname, ftype)
+    ftype isa TypeVar && return string(fname) * "::" * string(ftype.name)
+    return string(fname) * "::" * string(ftype)
+end
+
+function _st_concrete_str(T, indent=0)
+    pad = "    " ^ indent
+    sig = _st_type_sig(T)
+    _, body = _st_split(T)
+    fnames = fieldnames(body)
+    isempty(fnames) && return pad * sig
+    fields = join([_st_field_str(n, t) for (n, t) in zip(fnames, body.types)], ", ")
+    return pad * sig * "(" * fields * ")"
+end
+
+function _st_leaves(T)
+    result = Any[]
+    for S in subtypes(T)
+        isabstracttype(S) ? append!(result, _st_leaves(S)) : push!(result, S)
+    end
+    return result
+end
+
+function _st_impl(T, indent=0)
+    pad = "    " ^ indent
+    sig = _st_type_sig(T)
+    subs = subtypes(T)
+    isempty(subs) && return pad * sig
+    sub_strs = map(subs) do S
+        isabstracttype(S) ? _st_impl(S, indent + 1) : _st_concrete_str(S, indent + 1)
+    end
+    return pad * sig * " > (\n" * join(sub_strs, ",\n") * "\n" * pad * ")"
+end
+
+function _show_types_str(T)
+    if isabstracttype(T)
+        leaves = _st_leaves(T)
+        prefix = !isempty(leaves) && all(ismutabletype, leaves) ? "mutable " : ""
+        return prefix * _st_impl(T)
+    else
+        prefix = ismutabletype(T) ? "mutable " : ""
+        return prefix * _st_concrete_str(T)
+    end
+end
 
 #-----------------------------------------------------------------------------# @types helpers
 function _terse_parse_type(ex)
@@ -170,6 +239,31 @@ end
 macro types(mutable_kw, ex)
     mutable_kw === :mutable || error("@types: expected `mutable`, got `$mutable_kw`")
     esc(_types_single(true, ex))
+end
+
+#-----------------------------------------------------------------------------# @show_types
+"""
+    @show_types T
+
+Display the type hierarchy rooted at `T` in `@types` syntax.
+
+### Examples
+
+```julia
+@types Animal > (
+    Cat(lives::Int),
+    Dog(name::String)
+)
+
+@show_types Animal
+# Animal > (
+#     Cat(lives::Int64),
+#     Dog(name::String)
+# )
+```
+"""
+macro show_types(T)
+    :(println(_show_types_str($(esc(T)))))
 end
 
 end # module
