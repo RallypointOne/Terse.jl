@@ -84,7 +84,7 @@ d.name = "Spot"   # error — name is const
 | Concise one-liner syntax | | ✓ | | ✓ | ✓ |
 | Default field values | ✓ | ✓ | ✓ | | ✓ |
 | Keyword constructors | ✓ | ✓ | ✓ | | ✓ |
-| Mutable structs | ✓ | ✓ | | ✓ | ✓ |
+| Mutable structs | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Parametric types | ✓ | ✓ | ✓ | ✓ (auto-inferred) | ✓ |
 | Define abstract supertypes | | | | | ✓ |
 | Full type hierarchy in one expression | | | | | ✓ |
