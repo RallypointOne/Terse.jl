@@ -172,6 +172,31 @@ using Test
         @test_throws ErrorException (d.name = "Spot")
     end
 
+    @testset "docstrings" begin
+        @types DocAnimal > (
+            "A cat with nine lives.",
+            DocCat(lives::Int),
+            DocDog(name::String),
+            DocBird(wings::Int = 2; can_fly::Bool = true),
+        )
+        cat_doc = string(@doc(DocCat))
+        dog_doc = string(@doc(DocDog))
+        bird_doc = string(@doc(DocBird))
+        @test occursin("A cat with nine lives.", cat_doc)
+        @test occursin("DocAnimal >", dog_doc)
+        @test occursin("DocDog(name::String)", dog_doc)
+        @test occursin("DocAnimal >", bird_doc)
+        @test occursin("DocBird(wings::Int = 2; can_fly::Bool = true)", bird_doc)
+
+        # Nested hierarchy path in auto-doc
+        @types DocShape > (
+            DocFlat > (
+                DocCircle(radius::Float64),
+            )
+        )
+        @test occursin("DocShape > DocFlat >", string(@doc(DocCircle)))
+    end
+
     @testset "@show_types" begin
         @types STAnimal > (
             STCat(lives::Int),

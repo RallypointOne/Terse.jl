@@ -117,6 +117,31 @@ _fname(f) = Meta.isexpr(f, :(::)) ? f.args[1] : f
 
 _build_curly(name, params) = isempty(params) ? name : Expr(:curly, name, params...)
 
+_is_docstr(ex) = ex isa AbstractString || Meta.isexpr(ex, :string)
+
+function _expr_to_str(ex)
+    ex isa Symbol && return string(ex)
+    ex isa Number && return string(ex)
+    ex isa AbstractString && return repr(ex)
+    Meta.isexpr(ex, :(::)) && return _expr_to_str(ex.args[1]) * "::" * _expr_to_str(ex.args[2])
+    Meta.isexpr(ex, :kw) && return _expr_to_str(ex.args[1]) * " = " * _expr_to_str(ex.args[2])
+    Meta.isexpr(ex, :<:) && return _expr_to_str(ex.args[1]) * " <: " * _expr_to_str(ex.args[2])
+    Meta.isexpr(ex, :curly) && return _expr_to_str(ex.args[1]) * "{" * join(_expr_to_str.(ex.args[2:end]), ", ") * "}"
+    return string(ex)
+end
+
+function _autodoc_sig(name, params, pos_fields, kw_fields)
+    name_str = isempty(params) ? string(name) : string(name) * "{" * join(_expr_to_str.(params), ", ") * "}"
+    isempty(pos_fields) && isempty(kw_fields) && return name_str
+    pos_strs = _expr_to_str.(_unwrap_const.(pos_fields))
+    isempty(kw_fields) && return name_str * "(" * join(pos_strs, ", ") * ")"
+    kw_strs = _expr_to_str.(_unwrap_const.(kw_fields))
+    pfx = isempty(pos_strs) ? "" : join(pos_strs, ", ") * "; "
+    return name_str * "(" * pfx * join(kw_strs, ", ") * ")"
+end
+
+_wrap_doc(doc, ex) = Expr(:macrocall, GlobalRef(Core, Symbol("@doc")), LineNumberNode(0, :none), doc, ex)
+
 # If the expression is a `@mutable` macrocall, set flag and unwrap.
 function _unwrap_mutable(is_mutable, ex)
     Meta.isexpr(ex, :macrocall) && ex.args[1] === _MUTABLE_SYM || return is_mutable, ex
@@ -158,23 +183,36 @@ function _make_struct(is_mutable, sig, pos_fields, kw_fields=Any[])
     end
 end
 
-function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing; is_mutable=false)
+function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing; is_mutable=false, docpath="")
     abstract_name, abstract_params = _terse_parse_type(abstract_expr)
     abstract_head = _build_curly(abstract_name, abstract_params)
     abstract_decl = Expr(:abstract, parent_head === nothing ? abstract_head : Expr(:<:, abstract_head, parent_head))
+    current_path = isempty(docpath) ? string(abstract_name) : docpath * " > " * string(abstract_name)
 
     children = Meta.isexpr(subtypes_expr, :tuple) ? subtypes_expr.args : [subtypes_expr]
 
-    decls = map(children) do st
+    decls = Any[]
+    pending_doc = nothing
+    for st in children
+        if _is_docstr(st)
+            pending_doc = st
+            continue
+        end
         local_mutable, st = _unwrap_mutable(is_mutable, st)
-
         if Meta.isexpr(st, :call) && st.args[1] == :>
-            _types_impl(st.args[2], st.args[3], abstract_head; is_mutable=local_mutable)
+            push!(decls, _types_impl(st.args[2], st.args[3], abstract_head; is_mutable=local_mutable, docpath=current_path))
+            pending_doc = nothing
         elseif st isa Symbol
-            _make_struct(local_mutable, Expr(:<:, _build_curly(st, abstract_params), abstract_head), Any[])
+            struct_expr = _make_struct(local_mutable, Expr(:<:, _build_curly(st, abstract_params), abstract_head), Any[])
+            doc = something(pending_doc, current_path * " > \n" * _autodoc_sig(st, abstract_params, Any[], Any[]))
+            push!(decls, _wrap_doc(doc, struct_expr))
+            pending_doc = nothing
         else
             name, params, pos_fields, kw_fields = _terse_parse_subtype(st)
-            _make_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), pos_fields, kw_fields)
+            struct_expr = _make_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), pos_fields, kw_fields)
+            doc = something(pending_doc, current_path * " > \n" * _autodoc_sig(name, params, pos_fields, kw_fields))
+            push!(decls, _wrap_doc(doc, struct_expr))
+            pending_doc = nothing
         end
     end
 
@@ -217,6 +255,9 @@ Define abstract types, concrete structs, or full type hierarchies in one express
   constructor that mirrors the exact positional/keyword split you specify.
 - Subtypes can themselves use `>` to define nested hierarchies.
 - Bare names (no parentheses) produce zero-field structs inheriting the parent's type parameters.
+- Each concrete subtype gets an auto-generated docstring showing its hierarchy path and
+  constructor signature (e.g. `"Animal > \nDog(name::String)"`). Place a string literal
+  immediately before a subtype entry to override it with a custom docstring.
 
 ### Examples
 
@@ -239,6 +280,13 @@ Define abstract types, concrete structs, or full type hierarchies in one express
 @types Animal > (
     Cat(lives::Int = 9),
     @mutable Dog(@const(name::String), legs::Int)
+)
+
+# Custom docstrings: place a string before the entry to override the auto-generated doc
+@types Animal > (
+    "A feline with a fixed number of lives.",
+    Cat(lives::Int = 9),
+    Dog(name::String),  # auto-doc: "Animal > \nDog(name::String)"
 )
 
 @types Animal{T} > (
