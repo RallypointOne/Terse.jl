@@ -197,54 +197,44 @@ using Test
         @test occursin("DocShape > DocFlat >", string(@doc(DocCircle)))
     end
 
-    @testset "@show_types" begin
-        @types STAnimal > (
-            STCat(lives::Int),
-            STDog(name::String)
+    @testset "autoshow" begin
+        @types ShowShape > (
+            ShowCircle(radius::Float64),
+            ShowRect(width::Float64, height::Float64)
         )
-        s = Terse._show_types_str(STAnimal)
-        @test s == "STAnimal > (\n    STCat(lives::Int64),\n    STDog(name::String)\n)"
+        # Basic show
+        @test repr(ShowCircle(3.14)) == "ShowCircle(radius=3.14)"
+        @test repr(ShowRect(2.0, 3.0)) == "ShowRect(width=2.0, height=3.0)"
 
-        # Nested hierarchy
-        @types STVehicle > (
-            STCar(doors::Int),
-            STMotored > (
-                STTruck(payload::Float64),
-                STBus(seats::Int)
-            )
-        )
-        s2 = Terse._show_types_str(STVehicle)
-        @test occursin("STVehicle > (", s2)
-        @test occursin("    STCar(doors::Int64)", s2)
-        @test occursin("    STMotored > (", s2)
-        @test occursin("        STTruck(payload::Float64)", s2)
-        @test occursin("        STBus(seats::Int64)", s2)
+        # Zero-field type
+        @types ShowAnimal > (ShowCat, ShowDog)
+        @test repr(ShowCat()) == "ShowCat"
+        @test repr(ShowDog()) == "ShowDog"
 
-        # Single concrete type
-        @types STPoint(x::Float64, y::Float64)
-        @test Terse._show_types_str(STPoint) == "STPoint(x::Float64, y::Float64)"
+        # Parametric type
+        @types ShowBox{T}(value::T)
+        @test repr(ShowBox{Int}(42)) == "ShowBox{Int64}(value=42)"
 
-        # Mutable types get "mutable " prefix
-        @types mutable STMVehicle > (STMCar(doors::Int), STMBike(gears::Int))
-        @test startswith(Terse._show_types_str(STMVehicle), "mutable ")
+        # Nested types are abbreviated
+        @types ShowWrapper(name::String, shape::ShowShape)
+        @test repr(ShowWrapper("w", ShowCircle(1.0))) == "ShowWrapper(name=\"w\", shape=ShowCircle(…))"
 
-        # Mixed mutability: @mutable subtypes get @mutable prefix, const fields get @const(...)
-        @types STMixed > (
-            STMixedA(x::Int),
-            @mutable STMixedB(@const(name::String), y::Int)
-        )
-        s4 = Terse._show_types_str(STMixed)
-        @test occursin("STMixedA(x::Int64)", s4)
-        @test occursin("@mutable STMixedB(@const(name::String), y::Int64)", s4)
+        # Double nesting
+        @types ShowOuter(label::String, inner::ShowWrapper)
+        @test repr(ShowOuter("top", ShowWrapper("mid", ShowCircle(1.0)))) ==
+            "ShowOuter(label=\"top\", inner=ShowWrapper(…))"
 
-        # Parametric types show TypeVar names
-        @types STContainer{T} > (
-            STBox{T}(value::T),
-            STTagged{T, S <: AbstractString}(value::T, tag::S)
-        )
-        s3 = Terse._show_types_str(STContainer)
-        @test occursin("STContainer{T}", s3)
-        @test occursin("STBox{T}(value::T)", s3)
-        @test occursin("STTagged{T, S <: AbstractString}(value::T, tag::S)", s3)
+        # Standalone concrete type
+        @types ShowPoint(x::Float64, y::Float64)
+        @test repr(ShowPoint(1.0, 2.0)) == "ShowPoint(x=1.0, y=2.0)"
+
+        # Standalone concrete type with supertype
+        @types ShowBase
+        @types ShowChild(n::Int) <: ShowBase
+        @test repr(ShowChild(5)) == "ShowChild(n=5)"
+
+        # Non-terse types in fields are shown normally
+        @types ShowMixed(n::Int, s::String, v::Vector{Int})
+        @test repr(ShowMixed(1, "hi", [1,2,3])) == "ShowMixed(n=1, s=\"hi\", v=[1, 2, 3])"
     end
 end
