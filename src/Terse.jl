@@ -150,11 +150,21 @@ function _make_struct(is_mutable, sig, pos_fields, kw_fields=Any[])
     end
 end
 
+# Check if `name` is already an abstract type in `mod`.
+function _is_existing_abstract(mod, name)
+    isdefined(mod, name) || return false
+    T = getfield(mod, name)
+    T isa Type || error("@types: `$name` exists but is not a type")
+    isabstracttype(T) || error("@types: `$name` is a concrete type; cannot add subtypes")
+    return true
+end
+
 # Recursively generate abstract type + concrete subtypes for a `Parent > (children...)` hierarchy.
-function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing; is_mutable=false, docpath="")
+function _types_impl(mod, abstract_expr, subtypes_expr, parent_head=nothing; is_mutable=false, docpath="")
     abstract_name, abstract_params = _terse_parse_type(abstract_expr)
     abstract_head = _build_curly(abstract_name, abstract_params)
-    abstract_decl = Expr(:abstract, parent_head === nothing ? abstract_head : Expr(:<:, abstract_head, parent_head))
+    existing = _is_existing_abstract(mod, abstract_name)
+    abstract_decl = existing ? nothing : Expr(:abstract, parent_head === nothing ? abstract_head : Expr(:<:, abstract_head, parent_head))
     current_path = isempty(docpath) ? string(abstract_name) : docpath * " > " * string(abstract_name)
 
     children = Meta.isexpr(subtypes_expr, :tuple) ? subtypes_expr.args : [subtypes_expr]
@@ -168,7 +178,7 @@ function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing; is_mutab
         end
         local_mutable, st = _unwrap_mutable(is_mutable, st)
         if Meta.isexpr(st, :call) && st.args[1] == :>
-            push!(decls, _types_impl(st.args[2], st.args[3], abstract_head; is_mutable=local_mutable, docpath=current_path))
+            push!(decls, _types_impl(mod, st.args[2], st.args[3], abstract_head; is_mutable=local_mutable, docpath=current_path))
             pending_doc = nothing
         elseif st isa Symbol
             struct_expr = _make_struct(local_mutable, Expr(:<:, _build_curly(st, abstract_params), abstract_head), Any[])
@@ -188,11 +198,12 @@ function _types_impl(abstract_expr, subtypes_expr, parent_head=nothing; is_mutab
 
     is_terse = GlobalRef(Terse, :is_terse_type)
     abstract_trait = Expr(:(=), Expr(:call, is_terse, Expr(:(::), Expr(:curly, :Type, Expr(:(<:), abstract_name)))), true)
-    return Expr(:block, abstract_decl, abstract_trait, decls...)
+    preamble = existing ? [abstract_trait] : [abstract_decl, abstract_trait]
+    return Expr(:block, preamble..., decls...)
 end
 
 # Top-level dispatch: route a single @types expression to the appropriate code generator.
-function _types_single(is_mutable, ex)
+function _types_single(mod, is_mutable, ex)
     is_mutable, ex = _unwrap_mutable(is_mutable, ex)
     if ex isa Symbol || Meta.isexpr(ex, :curly)
         abstract_name, abstract_params = _terse_parse_type(ex)
@@ -206,7 +217,7 @@ function _types_single(is_mutable, ex)
         struct_expr = _make_struct(is_mutable, Expr(:<:, _build_curly(name, params), ex.args[2]), pos_fields, kw_fields)
         return Expr(:block, struct_expr, _show_method_exprs(name)...)
     elseif Meta.isexpr(ex, :call) && ex.args[1] == :>
-        return _types_impl(ex.args[2], ex.args[3]; is_mutable)
+        return _types_impl(mod, ex.args[2], ex.args[3]; is_mutable)
     end
     error("@types: unrecognised syntax: $ex")
 end
@@ -275,12 +286,12 @@ Define abstract types, concrete structs, or full type hierarchies in one express
 ```
 """
 macro types(ex)
-    esc(_types_single(false, ex))
+    esc(_types_single(__module__, false, ex))
 end
 
 macro types(mutable_kw, ex)
     mutable_kw === :mutable || error("@types: expected `mutable`, got `$mutable_kw`")
-    esc(_types_single(true, ex))
+    esc(_types_single(__module__, true, ex))
 end
 
 end # module

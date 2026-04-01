@@ -237,4 +237,27 @@ using Test
         @types ShowMixed(n::Int, s::String, v::Vector{Int})
         @test repr(ShowMixed(1, "hi", [1,2,3])) == "ShowMixed(n=1, s=\"hi\", v=[1, 2, 3])"
     end
+
+    @testset "extend existing abstract type" begin
+        abstract type ExistingAnimal end
+        @types ExistingAnimal > (
+            ExCat(lives::Int),
+            ExDog(name::String)
+        )
+        @test supertype(ExCat) === ExistingAnimal
+        @test supertype(ExDog) === ExistingAnimal
+        @test ExCat(9) isa ExistingAnimal
+        @test repr(ExDog("Rex")) == "ExDog(name=\"Rex\")"
+
+        # Parametric existing abstract type
+        abstract type ExistingContainer{T} end
+        @types ExistingContainer{T} > (
+            ExBox{T}(value::T),
+        )
+        @test supertype(ExBox{Int}) === ExistingContainer{Int}
+
+        # Error on concrete type
+        @types ExConcreteType(x::Int)
+        @test_throws LoadError eval(:(@types ExConcreteType > (Foo(x::Int),)))
+    end
 end
