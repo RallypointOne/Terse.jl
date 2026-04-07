@@ -180,11 +180,13 @@ function _types_impl(mod, abstract_expr, subtypes_expr, parent_head=nothing; is_
         if Meta.isexpr(st, :call) && st.args[1] == :>
             push!(decls, _types_impl(mod, st.args[2], st.args[3], abstract_head; is_mutable=local_mutable, docpath=current_path))
             pending_doc = nothing
-        elseif st isa Symbol
-            struct_expr = _make_struct(local_mutable, Expr(:<:, _build_curly(st, abstract_params), abstract_head), Any[])
-            doc = something(pending_doc, current_path * " > \n" * _autodoc_sig(st, abstract_params, Any[], Any[]))
+        elseif st isa Symbol || Meta.isexpr(st, :curly)
+            name, params = _terse_parse_type(st)
+            params = isempty(params) ? abstract_params : params
+            struct_expr = _make_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), Any[])
+            doc = something(pending_doc, current_path * " > \n" * _autodoc_sig(name, params, Any[], Any[]))
             push!(decls, _wrap_doc(doc, struct_expr))
-            append!(decls, _show_method_exprs(st))
+            append!(decls, _show_method_exprs(name))
             pending_doc = nothing
         else
             name, params, pos_fields, kw_fields = _terse_parse_subtype(st)

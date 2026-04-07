@@ -238,6 +238,26 @@ using Test
         @test repr(ShowMixed(1, "hi", [1,2,3])) == "ShowMixed(n=1, s=\"hi\", v=[1, 2, 3])"
     end
 
+    @testset "bare parametric subtypes" begin
+        @types Geometry > (
+            GPoint,
+            GCurve > (
+                GLine,
+                GLineString,
+            ),
+            GSurface > (
+                GPolygon,
+            ),
+            GGeometryCollection > (
+                GMulti{T}
+            )
+        )
+        @test supertype(GPoint) === Geometry
+        @test supertype(GLine) === GCurve
+        @test supertype(GMulti{Int}) === GGeometryCollection
+        @test GMulti{String}() isa GGeometryCollection
+    end
+
     @testset "extend existing abstract type" begin
         abstract type ExistingAnimal end
         @types ExistingAnimal > (
