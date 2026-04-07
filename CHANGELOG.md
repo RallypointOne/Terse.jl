@@ -1,5 +1,23 @@
 ## Unreleased
 
+## v0.2.1 - 2026-04-07
+
+### Features
+
+- Support bare parametric subtypes in `@types` hierarchies (e.g. `Multi{T}` as a child type)
+- Support extending existing abstract types in `@types` hierarchies
+
+## v0.2.0 - 2026-04-07
+
+### Features
+
+- Add autoshow support (automatic display of type hierarchies)
+- Add auto-generated and user-defined docstrings to `@types` hierarchies
+
+### Breaking
+
+- Remove `@show_types` macro (replaced by autoshow)
+
 ## v0.1.0 - 2026-03-25
 
 ### Features
