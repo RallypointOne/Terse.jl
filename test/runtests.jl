@@ -258,6 +258,51 @@ using Test
         @test GMulti{String}() isa GGeometryCollection
     end
 
+    @testset "@hide fields" begin
+        # Standalone type
+        @types HidePoint(x::Float64, @hide(y::Float64))
+        @test HidePoint(1.0, 2.0).y == 2.0
+        @test repr(HidePoint(1.0, 2.0)) == "HidePoint(x=1.0)"
+
+        # Hierarchy
+        @types HideAnimal > (
+            HideCat(lives::Int, @hide(secret::String)),
+            HideDog(@hide(id::Int), name::String),
+        )
+        @test repr(HideCat(9, "whiskers")) == "HideCat(lives=9)"
+        @test repr(HideDog(42, "Rex")) == "HideDog(name=\"Rex\")"
+        @test HideDog(42, "Rex").id == 42
+
+        # All fields hidden
+        @types HideSecret(@hide(x::Int), @hide(y::Int))
+        @test repr(HideSecret(1, 2)) == "HideSecret"
+
+        # @hide + @const combo
+        @types mutable HideConst(@hide(@const(id::Int)), name::String)
+        h = HideConst(1, "test")
+        @test repr(h) == "HideConst(name=\"test\")"
+        @test h.id == 1
+        @test Base.isconst(HideConst, :id)
+
+        # @hide in keyword fields
+        @types HideKW(name::String; @hide(debug::Bool) = false)
+        @test repr(HideKW("hi")) == "HideKW(name=\"hi\")"
+        @test HideKW("hi").debug == false
+    end
+
+    @testset "@esc escape hatch" begin
+        @types EscAnimal > (
+            EscCat(lives::Int),
+            EscDog(name::String),
+            @esc(sound(x::EscCat) = "meow"),
+            @esc(sound(x::EscDog) = "woof"),
+        )
+        @test supertype(EscCat) === EscAnimal
+        @test supertype(EscDog) === EscAnimal
+        @test sound(EscCat(9)) == "meow"
+        @test sound(EscDog("Rex")) == "woof"
+    end
+
     @testset "extend existing abstract type" begin
         abstract type ExistingAnimal end
         @types ExistingAnimal > (

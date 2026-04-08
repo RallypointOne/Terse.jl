@@ -97,6 +97,32 @@ d.legs = 3        # ok — legs is mutable
 d.name = "Spot"   # error — name is const
 ```
 
+**Hidden fields:**
+
+Use `@hide(field)` to suppress a field from the auto-generated `show` method (the field is still part of the struct and constructor):
+
+```julia
+@types Token(value::String, @hide(raw::Vector{UInt8}))
+
+Token("abc", UInt8[0x61, 0x62, 0x63])  # Token(value="abc")
+```
+
+**Escape hatch for arbitrary code:**
+
+Use `@esc(expr)` inside a hierarchy to splice arbitrary expressions (e.g. interface methods) into the output alongside the type definitions:
+
+```julia
+@types Animal > (
+    Cat(lives::Int),
+    Dog(name::String),
+    @esc(sound(x::Cat) = "meow"),
+    @esc(sound(x::Dog) = "woof"),
+)
+
+sound(Cat(9))   # "meow"
+sound(Dog("Rex"))  # "woof"
+```
+
 ## Comparison with Similar Packages
 
 | Feature | `Base.@kwdef` | [QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) | [Parameters.jl](https://github.com/mauro3/Parameters.jl) | [ConcreteStructs.jl](https://github.com/SciML/ConcreteStructs.jl) | **Terse.jl** |
@@ -111,7 +137,9 @@ d.name = "Spot"   # error — name is const
 | Nested abstract hierarchies | | | | | ✓ |
 | Per-type mutability | | | | | ✓ |
 | Const fields (Julia 1.8+) | | | | | ✓ |
-| Source lines | — | ~540 | ~670 | ~245 | ~175 |
+| Hidden fields (`@hide`) | | | | | ✓ |
+| Escape hatch (`@esc`) | | | | | ✓ |
+| Source lines | — | ~540 | ~670 | ~245 | ~280 |
 | Dependencies | — | ConstructionBase, MacroTools | OrderedCollections, UnPack | none | none |
 
 Concrete example: an abstract `Animal` with a `Cat` (default `lives=9`) and a mutable `Dog` with a const `name` field:
