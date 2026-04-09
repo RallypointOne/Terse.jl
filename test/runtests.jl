@@ -96,8 +96,8 @@ using Test
         @types Config(host::String, port::Int = 8080, timeout::Int = 30)
         @test Config("localhost") == Config("localhost", 8080, 30)
         @test Config("localhost", 9000) == Config("localhost", 9000, 30)
-        @test Config("localhost", port=9000) == Config("localhost", 9000, 30)
-        @test Config("localhost", timeout=60) == Config("localhost", 8080, 60)
+        @test Config(; host="localhost", port=9000) == Config("localhost", 9000, 30)
+        @test Config(; host="localhost", timeout=60) == Config("localhost", 8080, 60)
     end
 
     @testset "@types mutable with defaults" begin
@@ -170,6 +170,13 @@ using Test
         d.legs = 3
         @test d.legs == 3
         @test_throws ErrorException (d.name = "Spot")
+
+        # @const + defaults should not cause method overwrite errors
+        @types ConstAnimal2 > @mutable ConstFoo(@const(a::Int), @const(b::String), c::Int = 1, d::Int = 2)
+        f = ConstFoo(10, "hi")
+        @test f.a == 10 && f.b == "hi" && f.c == 1 && f.d == 2
+        f2 = ConstFoo(; a=10, b="hi", c=3, d=4)
+        @test f2.a == 10 && f2.b == "hi" && f2.c == 3 && f2.d == 4
     end
 
     @testset "docstrings" begin

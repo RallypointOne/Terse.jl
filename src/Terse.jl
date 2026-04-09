@@ -217,7 +217,7 @@ function _make_struct(is_mutable, sig, pos_fields, kw_fields=Any[])
         optional = filter(f ->  Meta.isexpr(_unwrap_const(f), :kw), pos_fields)
         pos_ctor = Expr(:(=), Expr(:call, ctor, map(_unwrap_const, pos_fields)...), new_call)
         kw_ctor  = Expr(:(=),
-            Expr(:call, ctor, Expr(:parameters, map(_unwrap_const, optional)...), map(_unwrap_const, required)...),
+            Expr(:call, ctor, Expr(:parameters, map(_unwrap_const, required)..., map(_unwrap_const, optional)...)),
             new_call)
         return Expr(:struct, is_mutable, sig, Expr(:block, struct_pos..., pos_ctor, kw_ctor))
     end
