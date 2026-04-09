@@ -1,5 +1,11 @@
 ## Unreleased
 
+## v0.2.2 - 2026-04-09
+
+### Fixes
+
+- Fix parametric types with default values or keyword arguments (outer constructors with `where` clauses for proper type inference)
+
 ## v0.2.1 - 2026-04-07
 
 ### Features
