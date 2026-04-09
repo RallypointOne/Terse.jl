@@ -303,6 +303,31 @@ using Test
         @test sound(EscDog("Rex")) == "woof"
     end
 
+    @testset "parametric types with defaults/kwargs" begin
+        # Parametric + keyword args (standalone)
+        @types PRegion{G, E}(geometry::G; extent::E = nothing)
+        r = PRegion("hello")
+        @test r.geometry == "hello" && r.extent === nothing
+        r2 = PRegion("hello"; extent=42)
+        @test r2.geometry == "hello" && r2.extent == 42
+        @test r2 isa PRegion{String, Int}
+
+        # Parametric + positional defaults (standalone)
+        @types PPair{A, B}(first::A, second::B = nothing)
+        @test PPair(1).second === nothing
+        @test PPair(1, "hi") isa PPair{Int, String}
+        @test PPair(1; second="hi") isa PPair{Int, String}
+
+        # Parametric + keyword args in hierarchy
+        @types PShape{T} > (
+            PCircle{T}(radius::T; label::String = "circle"),
+            PSquare{T}(side::T),
+        )
+        @test PCircle(3.0) isa PShape{Float64}
+        @test PCircle(3.0).label == "circle"
+        @test PCircle(3.0; label="big") isa PShape{Float64}
+    end
+
     @testset "extend existing abstract type" begin
         abstract type ExistingAnimal end
         @types ExistingAnimal > (

@@ -99,6 +99,12 @@ function _terse_parse_type(ex)
     error("@types: invalid type expression: $ex")
 end
 
+# Extract type parameters from a struct signature (unwrapping `<:`).
+_sig_params(sig) = (inner = Meta.isexpr(sig, :<:) ? sig.args[1] : sig;
+    Meta.isexpr(inner, :curly) ? inner.args[2:end] : Any[])
+# Strip bounds from a type parameter: `T <: Integer` → `T`.
+_param_name(p) = Meta.isexpr(p, :<:) ? p.args[1] : p
+
 # Parse `Name(fields...; kw_fields...)` into (name, params, pos_fields, kw_fields).
 function _terse_parse_subtype(ex)
     Meta.isexpr(ex, :call) || error("@types: expected `TypeName(fields...)`, got: $ex")
@@ -154,6 +160,10 @@ function _unwrap_mutable(is_mutable, ex)
     return true, ex.args[end]
 end
 
+# Split a _make_struct result into (struct_expr, outer_ctors...).
+_split_struct(ex) = Meta.isexpr(ex, :block) && Meta.isexpr(ex.args[1], :struct) ?
+    (ex.args[1], ex.args[2:end]) : (ex, Any[])
+
 # Build a struct Expr with optional inner constructors for defaults/keyword args.
 function _make_struct(is_mutable, sig, pos_fields, kw_fields=Any[])
     has_const = any(_is_const_field, pos_fields) || any(_is_const_field, kw_fields)
@@ -172,6 +182,29 @@ function _make_struct(is_mutable, sig, pos_fields, kw_fields=Any[])
 
     !has_pos_defaults && !has_explicit_kw &&
         return Expr(:struct, is_mutable, sig, Expr(:block, struct_pos...))
+
+    params = _sig_params(sig)
+    param_names = map(_param_name, params)
+
+    if !isempty(params)
+        # Parametric types: use outer constructors so type params are inferred.
+        struct_expr = Expr(:struct, is_mutable, sig, Expr(:block, [struct_pos; struct_kw]...))
+        ctor_full = Expr(:curly, ctor, param_names...)
+        ctor_call = Expr(:call, ctor_full, all_names...)
+        if has_explicit_kw
+            call_sig = Expr(:call, ctor, Expr(:parameters, map(_unwrap_const, kw_fields)...), map(_unwrap_const, pos_fields)...)
+            outer = Expr(:(=), Expr(:where, call_sig, param_names...), ctor_call)
+            return Expr(:block, struct_expr, outer)
+        else
+            required = filter(f -> !Meta.isexpr(_unwrap_const(f), :kw), pos_fields)
+            optional = filter(f ->  Meta.isexpr(_unwrap_const(f), :kw), pos_fields)
+            pos_sig = Expr(:call, ctor, map(_unwrap_const, pos_fields)...)
+            pos_outer = Expr(:(=), Expr(:where, pos_sig, param_names...), ctor_call)
+            kw_sig = Expr(:call, ctor, Expr(:parameters, map(_unwrap_const, optional)...), map(_unwrap_const, required)...)
+            kw_outer = Expr(:(=), Expr(:where, kw_sig, param_names...), ctor_call)
+            return Expr(:block, struct_expr, pos_outer, kw_outer)
+        end
+    end
 
     new_call = Expr(:call, :new, all_names...)
     if has_explicit_kw
@@ -227,9 +260,11 @@ function _types_impl(mod, abstract_expr, subtypes_expr, parent_head=nothing; is_
         elseif st isa Symbol || Meta.isexpr(st, :curly)
             name, params = _terse_parse_type(st)
             params = isempty(params) ? abstract_params : params
-            struct_expr = _make_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), Any[])
+            result = _make_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), Any[])
+            s, outer = _split_struct(result)
             doc = something(pending_doc, current_path * " > \n" * _autodoc_sig(name, params, Any[], Any[]))
-            push!(decls, _wrap_doc(doc, struct_expr))
+            push!(decls, _wrap_doc(doc, s))
+            append!(decls, outer)
             append!(decls, _show_method_exprs(name))
             pending_doc = nothing
         else
@@ -237,9 +272,11 @@ function _types_impl(mod, abstract_expr, subtypes_expr, parent_head=nothing; is_
             pos_fields, hidden_pos = _strip_hidden(pos_fields)
             kw_fields, hidden_kw = _strip_hidden(kw_fields)
             hidden = [hidden_pos; hidden_kw]
-            struct_expr = _make_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), pos_fields, kw_fields)
+            result = _make_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), pos_fields, kw_fields)
+            s, outer = _split_struct(result)
             doc = something(pending_doc, current_path * " > \n" * _autodoc_sig(name, params, pos_fields, kw_fields))
-            push!(decls, _wrap_doc(doc, struct_expr))
+            push!(decls, _wrap_doc(doc, s))
+            append!(decls, outer)
             append!(decls, _show_method_exprs(name, hidden))
             pending_doc = nothing
         end
