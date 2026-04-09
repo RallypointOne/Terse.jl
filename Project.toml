@@ -1,6 +1,6 @@
 name = "Terse"
 uuid = "913af9f3-6a3d-46e7-8a90-1058e86354fb"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Josh Day <emailjoshday@gmail.com>"]
 
 [compat]

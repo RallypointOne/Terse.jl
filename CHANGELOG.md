@@ -1,5 +1,11 @@
 ## Unreleased
 
+## v0.2.3 - 2026-04-09
+
+### Fixes
+
+- Fix method overwrite error when using `@mutable` with `@const` fields and default values (keyword constructor now uses all-keyword args to avoid dispatch overlap)
+
 ## v0.2.2 - 2026-04-09
 
 ### Fixes
