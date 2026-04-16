@@ -1,5 +1,11 @@
 ## Unreleased
 
+## v0.2.4 - 2026-04-16
+
+### Features
+
+- Add computed constructors to `@types`: new syntax `Name(args...) = new(field::T = expr, ...)` lets struct fields differ from constructor arguments. Works standalone, with `<:` subtypes, in hierarchies, parametric types, and mutable variants.
+
 ## v0.2.3 - 2026-04-09
 
 ### Fixes
