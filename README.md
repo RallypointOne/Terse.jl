@@ -107,6 +107,27 @@ Use `@hide(field)` to suppress a field from the auto-generated `show` method (th
 Token("abc", UInt8[0x61, 0x62, 0x63])  # Token(value="abc")
 ```
 
+**Computed constructors:**
+
+Use `= new(field::T = expr, ...)` when the struct's stored fields should differ from the constructor arguments. Each `new(...)` argument defines a struct field and how it's computed:
+
+```julia
+@types Polar(x, y) = new(r::Float64 = hypot(x, y), θ::Float64 = atan(y, x))
+
+Polar(3.0, 4.0)  # Polar(r=5.0, θ=0.9272952180016122)
+```
+
+Works everywhere — standalone, with `<:`, in hierarchies, parametric, and mutable:
+
+```julia
+@types Transform > (
+    Scale(factor::Float64) = new(matrix::Vector{Float64} = [factor, factor]),
+    Translate(dx::Float64, dy::Float64) = new(offset::Vector{Float64} = [dx, dy]),
+)
+
+@types Sum{T}(a::T, b::T) = new(total::T = a + b)
+```
+
 **Escape hatch for arbitrary code:**
 
 Use `@esc(expr)` inside a hierarchy to splice arbitrary expressions (e.g. interface methods) into the output alongside the type definitions:
@@ -137,6 +158,7 @@ sound(Dog("Rex"))  # "woof"
 | Nested abstract hierarchies | | | | | ✓ |
 | Per-type mutability | | | | | ✓ |
 | Const fields (Julia 1.8+) | | | | | ✓ |
+| Computed constructors | | | | | ✓ |
 | Hidden fields (`@hide`) | | | | | ✓ |
 | Escape hatch (`@esc`) | | | | | ✓ |
 | Source lines | — | ~540 | ~670 | ~245 | ~280 |

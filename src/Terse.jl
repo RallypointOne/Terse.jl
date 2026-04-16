@@ -57,6 +57,33 @@ function _show_method_exprs(name, hidden=Symbol[])
     return result
 end
 
+#-----------------------------------------------------------------------------# computed constructors
+# Unwrap a :block wrapper from short-form function syntax: `f(x) = y` parses RHS as Expr(:block, LineNumberNode, y).
+_unwrap_block(ex) = Meta.isexpr(ex, :block) ? ex.args[end] : ex
+# Check if an expression is a computed constructor: `Name(args...) = new(field = expr, ...)`.
+_is_computed_ctor(ex) = Meta.isexpr(ex, :(=)) && (rhs = _unwrap_block(ex.args[2]); Meta.isexpr(rhs, :call) && rhs.args[1] === :new)
+
+# Build a struct with a custom constructor from `Name(args...) = new(field::T = expr, ...)`.
+function _make_computed_struct(is_mutable, sig, ctor_args, new_fields)
+    all(f -> Meta.isexpr(f, :kw), new_fields) ||
+        error("@types: every argument to `new(...)` must be `field = expr` or `field::T = expr`")
+    ctor = _ctor_name(sig)
+    struct_fields = map(f -> f.args[1], new_fields)
+    field_values  = map(f -> f.args[2], new_fields)
+    params = _sig_params(sig)
+    param_names = map(_param_name, params)
+    if isempty(params)
+        new_call = Expr(:call, :new, field_values...)
+        ctor_def = Expr(:(=), Expr(:call, ctor, ctor_args...), new_call)
+        return Expr(:struct, is_mutable, sig, Expr(:block, struct_fields..., ctor_def))
+    else
+        struct_expr = Expr(:struct, is_mutable, sig, Expr(:block, struct_fields...))
+        ctor_call = Expr(:call, Expr(:curly, ctor, param_names...), field_values...)
+        outer = Expr(:(=), Expr(:where, Expr(:call, ctor, ctor_args...), param_names...), ctor_call)
+        return Expr(:block, struct_expr, outer)
+    end
+end
+
 #-----------------------------------------------------------------------------# @types helpers
 # Check if a field expr is wrapped in @hide(...).
 _is_hidden_field(f) = Meta.isexpr(f, :macrocall) && f.args[1] === _HIDE_SYM
@@ -254,7 +281,19 @@ function _types_impl(mod, abstract_expr, subtypes_expr, parent_head=nothing; is_
             continue
         end
         local_mutable, st = _unwrap_mutable(is_mutable, st)
-        if Meta.isexpr(st, :call) && st.args[1] == :>
+        if _is_computed_ctor(st)
+            ctor_expr, new_call = st.args[1], _unwrap_block(st.args[2])
+            name, params = _terse_parse_type(ctor_expr.args[1])
+            ctor_args = ctor_expr.args[2:end]
+            new_fields = new_call.args[2:end]
+            result = _make_computed_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), ctor_args, new_fields)
+            s, outer = _split_struct(result)
+            doc = something(pending_doc, current_path * " > \n" * _autodoc_sig(name, params, ctor_args, Any[]))
+            push!(decls, _wrap_doc(doc, s))
+            append!(decls, outer)
+            append!(decls, _show_method_exprs(name))
+            pending_doc = nothing
+        elseif Meta.isexpr(st, :call) && st.args[1] == :>
             push!(decls, _types_impl(mod, st.args[2], st.args[3], abstract_head; is_mutable=local_mutable, docpath=current_path))
             pending_doc = nothing
         elseif st isa Symbol || Meta.isexpr(st, :curly)
@@ -291,7 +330,23 @@ end
 # Top-level dispatch: route a single @types expression to the appropriate code generator.
 function _types_single(mod, is_mutable, ex)
     is_mutable, ex = _unwrap_mutable(is_mutable, ex)
-    if ex isa Symbol || Meta.isexpr(ex, :curly)
+    if _is_computed_ctor(ex)
+        lhs, new_call = ex.args[1], _unwrap_block(ex.args[2])
+        new_fields = new_call.args[2:end]
+        if Meta.isexpr(lhs, :<:)
+            ctor_expr, parent = lhs.args
+            name, params = _terse_parse_type(ctor_expr.args[1])
+            ctor_args = ctor_expr.args[2:end]
+            sig = Expr(:<:, _build_curly(name, params), parent)
+        else
+            name, params = _terse_parse_type(lhs.args[1])
+            ctor_args = lhs.args[2:end]
+            sig = _build_curly(name, params)
+        end
+        result = _make_computed_struct(is_mutable, sig, ctor_args, new_fields)
+        s, outer = _split_struct(result)
+        return Expr(:block, s, outer..., _show_method_exprs(name)...)
+    elseif ex isa Symbol || Meta.isexpr(ex, :curly)
         abstract_name, abstract_params = _terse_parse_type(ex)
         return Expr(:abstract, _build_curly(abstract_name, abstract_params))
     elseif Meta.isexpr(ex, :call) && ex.args[1] != :>
@@ -319,6 +374,7 @@ end
     @types AbstractType
     @types [mutable] ConcreteType(pos_fields...; kw_fields...)
     @types [mutable] ConcreteType(pos_fields...; kw_fields...) <: SuperType
+    @types [mutable] ConcreteType(args...) = new(field::T = expr, ...)
     @types [mutable] AbstractType > (Subtype1(fields...), Subtype2(fields...))
     @types [mutable] AbstractType{T} > (Subtype1{T}(fields...), Subtype2{T, S}(fields...))
 
@@ -334,6 +390,10 @@ Define abstract types, concrete structs, or full type hierarchies in one express
 - Subtypes can themselves use `>` to define nested hierarchies.
 - Bare names (no parentheses) produce zero-field structs inheriting the parent's type parameters.
 - `@hide(field::T)` suppresses a field from the auto-generated `show` method.
+- Computed constructors (`Name(args...) = new(field::T = expr, ...)`) let you define struct
+  fields that differ from the constructor arguments. Each `new(...)` argument must be
+  `field = expr` or `field::T = expr`, where `expr` computes the stored value from the
+  constructor args.
 - `@esc(expr)` splices arbitrary code (e.g. interface methods) into the hierarchy output.
 - Each concrete subtype gets an auto-generated docstring showing its hierarchy path and
   constructor signature (e.g. `"Animal > \nDog(name::String)"`). Place a string literal
@@ -368,6 +428,9 @@ Define abstract types, concrete structs, or full type hierarchies in one express
     Cat(lives::Int = 9),
     Dog(name::String),  # auto-doc: "Animal > \nDog(name::String)"
 )
+
+# Computed constructor: struct fields differ from constructor args
+@types Point(x, y) = new(r::Float64 = hypot(x, y), θ::Float64 = atan(y, x))
 
 @types Animal{T} > (
     Cat{T}(lives::Int, family::T),

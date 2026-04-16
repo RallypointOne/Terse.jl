@@ -335,6 +335,45 @@ using Test
         @test PCircle(3.0; label="big") isa PShape{Float64}
     end
 
+    @testset "computed constructors" begin
+        # Standalone
+        @types Polar(x, y) = new(r::Float64 = hypot(x, y), θ::Float64 = atan(y, x))
+        p = Polar(3.0, 4.0)
+        @test p.r ≈ 5.0
+        @test p.θ ≈ atan(4.0, 3.0)
+        @test !hasproperty(p, :x)
+
+        # With supertype
+        @types CoordBase
+        @types PolarCoord(x, y) <: CoordBase = new(r::Float64 = hypot(x, y))
+        @test supertype(PolarCoord) === CoordBase
+        @test PolarCoord(3.0, 4.0).r ≈ 5.0
+
+        # In hierarchy
+        @types Transform > (
+            Scale(factor::Float64) = new(matrix::Vector{Float64} = [factor, factor]),
+            Translate(dx::Float64, dy::Float64) = new(offset::Vector{Float64} = [dx, dy]),
+        )
+        @test supertype(Scale) === Transform
+        @test Scale(2.0).matrix == [2.0, 2.0]
+        @test Translate(1.0, 2.0).offset == [1.0, 2.0]
+
+        # Mutable
+        @types mutable MutPolar(x, y) = new(r::Float64 = hypot(x, y))
+        mp = MutPolar(3.0, 4.0)
+        @test mp.r ≈ 5.0
+        mp.r = 10.0
+        @test mp.r == 10.0
+
+        # Parametric
+        @types ParamSum{T}(a::T, b::T) = new(total::T = a + b)
+        @test ParamSum(1, 2).total == 3
+        @test ParamSum(1.0, 2.0) isa ParamSum{Float64}
+
+        # Autoshow works
+        @test repr(Polar(3.0, 4.0)) == "Polar(r=5.0, θ=$(repr(atan(4.0, 3.0))))"
+    end
+
     @testset "extend existing abstract type" begin
         abstract type ExistingAnimal end
         @types ExistingAnimal > (
