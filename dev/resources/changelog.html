@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -41,10 +41,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-730002b28d11a81147b69cb58a38970d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3793a09f727e4166f67f05d827e59191.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-68b744eed1efc7fcd6c9121c6d67ff94.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-b893fc932ab592bc8e51f35707c75ce9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -204,6 +204,32 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#unreleased" id="toc-unreleased" class="nav-link active" data-scroll-target="#unreleased">Unreleased</a></li>
+  <li><a href="#v0.2.4---2026-04-16" id="toc-v0.2.4---2026-04-16" class="nav-link" data-scroll-target="#v0.2.4---2026-04-16">v0.2.4 - 2026-04-16</a>
+  <ul class="collapse">
+  <li><a href="#features" id="toc-features" class="nav-link" data-scroll-target="#features">Features</a></li>
+  </ul></li>
+  <li><a href="#v0.2.3---2026-04-09" id="toc-v0.2.3---2026-04-09" class="nav-link" data-scroll-target="#v0.2.3---2026-04-09">v0.2.3 - 2026-04-09</a>
+  <ul class="collapse">
+  <li><a href="#fixes" id="toc-fixes" class="nav-link" data-scroll-target="#fixes">Fixes</a></li>
+  </ul></li>
+  <li><a href="#v0.2.2---2026-04-09" id="toc-v0.2.2---2026-04-09" class="nav-link" data-scroll-target="#v0.2.2---2026-04-09">v0.2.2 - 2026-04-09</a>
+  <ul class="collapse">
+  <li><a href="#fixes-1" id="toc-fixes-1" class="nav-link" data-scroll-target="#fixes-1">Fixes</a></li>
+  </ul></li>
+  <li><a href="#v0.2.1---2026-04-07" id="toc-v0.2.1---2026-04-07" class="nav-link" data-scroll-target="#v0.2.1---2026-04-07">v0.2.1 - 2026-04-07</a>
+  <ul class="collapse">
+  <li><a href="#features-1" id="toc-features-1" class="nav-link" data-scroll-target="#features-1">Features</a></li>
+  </ul></li>
+  <li><a href="#v0.2.0---2026-04-07" id="toc-v0.2.0---2026-04-07" class="nav-link" data-scroll-target="#v0.2.0---2026-04-07">v0.2.0 - 2026-04-07</a>
+  <ul class="collapse">
+  <li><a href="#features-2" id="toc-features-2" class="nav-link" data-scroll-target="#features-2">Features</a></li>
+  <li><a href="#breaking" id="toc-breaking" class="nav-link" data-scroll-target="#breaking">Breaking</a></li>
+  </ul></li>
+  <li><a href="#v0.1.0---2026-03-25" id="toc-v0.1.0---2026-03-25" class="nav-link" data-scroll-target="#v0.1.0---2026-03-25">v0.1.0 - 2026-03-25</a>
+  <ul class="collapse">
+  <li><a href="#features-3" id="toc-features-3" class="nav-link" data-scroll-target="#features-3">Features</a></li>
+  <li><a href="#documentation" id="toc-documentation" class="nav-link" data-scroll-target="#documentation">Documentation</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -229,23 +255,84 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>No releases yet
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This package has not published a release yet.</p>
-</div>
-</div>
 <section id="unreleased" class="level2">
 <h2 class="anchored" data-anchor-id="unreleased">Unreleased</h2>
+</section>
+<section id="v0.2.4---2026-04-16" class="level2">
+<h2 class="anchored" data-anchor-id="v0.2.4---2026-04-16">v0.2.4 - 2026-04-16</h2>
+<section id="features" class="level3">
+<h3 class="anchored" data-anchor-id="features">Features</h3>
+<ul>
+<li>Add computed constructors to <code>@types</code>: new syntax <code>Name(args...) = new(field::T = expr, ...)</code> lets struct fields differ from constructor arguments. Works standalone, with <code>&lt;:</code> subtypes, in hierarchies, parametric types, and mutable variants.</li>
+</ul>
+</section>
+</section>
+<section id="v0.2.3---2026-04-09" class="level2">
+<h2 class="anchored" data-anchor-id="v0.2.3---2026-04-09">v0.2.3 - 2026-04-09</h2>
+<section id="fixes" class="level3">
+<h3 class="anchored" data-anchor-id="fixes">Fixes</h3>
+<ul>
+<li>Fix method overwrite error when using <code>@mutable</code> with <code>@const</code> fields and default values (keyword constructor now uses all-keyword args to avoid dispatch overlap)</li>
+</ul>
+</section>
+</section>
+<section id="v0.2.2---2026-04-09" class="level2">
+<h2 class="anchored" data-anchor-id="v0.2.2---2026-04-09">v0.2.2 - 2026-04-09</h2>
+<section id="fixes-1" class="level3">
+<h3 class="anchored" data-anchor-id="fixes-1">Fixes</h3>
+<ul>
+<li>Fix parametric types with default values or keyword arguments (outer constructors with <code>where</code> clauses for proper type inference)</li>
+</ul>
+</section>
+</section>
+<section id="v0.2.1---2026-04-07" class="level2">
+<h2 class="anchored" data-anchor-id="v0.2.1---2026-04-07">v0.2.1 - 2026-04-07</h2>
+<section id="features-1" class="level3">
+<h3 class="anchored" data-anchor-id="features-1">Features</h3>
+<ul>
+<li>Support bare parametric subtypes in <code>@types</code> hierarchies (e.g.&nbsp;<code>Multi{T}</code> as a child type)</li>
+<li>Support extending existing abstract types in <code>@types</code> hierarchies</li>
+</ul>
+</section>
+</section>
+<section id="v0.2.0---2026-04-07" class="level2">
+<h2 class="anchored" data-anchor-id="v0.2.0---2026-04-07">v0.2.0 - 2026-04-07</h2>
+<section id="features-2" class="level3">
+<h3 class="anchored" data-anchor-id="features-2">Features</h3>
+<ul>
+<li>Add autoshow support (automatic display of type hierarchies)</li>
+<li>Add auto-generated and user-defined docstrings to <code>@types</code> hierarchies</li>
+</ul>
+</section>
+<section id="breaking" class="level3">
+<h3 class="anchored" data-anchor-id="breaking">Breaking</h3>
+<ul>
+<li>Remove <code>@show_types</code> macro (replaced by autoshow)</li>
+</ul>
+</section>
+</section>
+<section id="v0.1.0---2026-03-25" class="level2">
+<h2 class="anchored" data-anchor-id="v0.1.0---2026-03-25">v0.1.0 - 2026-03-25</h2>
+<section id="features-3" class="level3">
+<h3 class="anchored" data-anchor-id="features-3">Features</h3>
+<ul>
+<li>Add <code>@qtype</code> macro for defining structs with positional constructors</li>
+<li>Add <code>@abstract</code> macro for defining abstract types</li>
+<li>Add <code>@types</code> macro for displaying type hierarchies</li>
+<li>Add <code>@mutable</code> per-subtype and <code>@const</code> field annotations for mutable struct support</li>
+<li>Add <code>@show_types</code> macro for displaying type hierarchies</li>
+<li>Support default field values and keyword argument constructors</li>
+</ul>
+</section>
+<section id="documentation" class="level3">
+<h3 class="anchored" data-anchor-id="documentation">Documentation</h3>
+<ul>
+<li>Add README with usage examples and comparison table against similar packages</li>
+<li>Add package comparison table with per-package code examples and source line counts</li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

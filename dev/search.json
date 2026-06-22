@@ -26,7 +26,7 @@
     "href": "index.html#quickstart",
     "title": "Terse.jl",
     "section": "Quickstart",
-    "text": "Quickstart\n\nusing Terse\n\n@types Shape &gt; (\n    Circle(radius::Float64),\n    Rectangle(width::Float64, height::Float64)\n)\n\n@show supertype(Circle), supertype(Rectangle)\nCircle(1.0), Rectangle(3.0, 4.0)\n\n(supertype(Circle), supertype(Rectangle)) = (Main.Notebook.Shape, Main.Notebook.Shape)\n\n\n(Circle(1.0), Rectangle(3.0, 4.0))\n\n\nSee Getting Started for a full overview of all supported syntax forms.",
+    "text": "Quickstart\n\nusing Terse\n\n@types Shape &gt; (\n    Circle(radius::Float64),\n    Rectangle(width::Float64, height::Float64)\n)\n\n@show supertype(Circle), supertype(Rectangle)\nCircle(1.0), Rectangle(3.0, 4.0)\n\n(supertype(Circle), supertype(Rectangle)) = (Main.Notebook.Shape, Main.Notebook.Shape)\n\n\n(Circle(radius=1.0), Rectangle(width=3.0, height=4.0))\n\n\nSee Getting Started for a full overview of all supported syntax forms.",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>Terse.jl</span>"
@@ -48,7 +48,7 @@
     "href": "getting-started.html#abstract-type-with-subtypes",
     "title": "Getting Started",
     "section": "Abstract Type with Subtypes",
-    "text": "Abstract Type with Subtypes\nUse &gt; to define an abstract type and its concrete subtypes together:\n\n@types Animal &gt; (\n    Cat(lives::Int),\n    Dog(name::String)\n)\n\nsupertype(Cat), supertype(Dog)\n\n(Animal, Animal)\n\n\n\nCat(9), Dog(\"Rex\")\n\n(Cat(9), Dog(\"Rex\"))",
+    "text": "Abstract Type with Subtypes\nUse &gt; to define an abstract type and its concrete subtypes together:\n\n@types Animal &gt; (\n    Cat(lives::Int),\n    Dog(name::String)\n)\n\nsupertype(Cat), supertype(Dog)\n\n(Animal, Animal)\n\n\n\nCat(9), Dog(\"Rex\")\n\n(Cat(lives=9), Dog(name=\"Rex\"))",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
@@ -59,7 +59,7 @@
     "href": "getting-started.html#parametric-types",
     "title": "Getting Started",
     "section": "Parametric Types",
-    "text": "Parametric Types\nType parameters and bounds work as normal Julia syntax inside {}:\n\n@types Envelope{T} &gt; (\n    Plain{T}(value::T),\n    Labelled{T, S &lt;: AbstractString}(value::T, label::S)\n)\n\nLabelled{Int, String}(42, \"answer\")\n\nLabelled{Int64, String}(42, \"answer\")",
+    "text": "Parametric Types\nType parameters and bounds work as normal Julia syntax inside {}:\n\n@types Envelope{T} &gt; (\n    Plain{T}(value::T),\n    Labelled{T, S &lt;: AbstractString}(value::T, label::S)\n)\n\nLabelled{Int, String}(42, \"answer\")\n\nLabelled{Int64, String}(value=42, label=\"answer\")",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
@@ -70,7 +70,7 @@
     "href": "getting-started.html#nested-hierarchies",
     "title": "Getting Started",
     "section": "Nested Hierarchies",
-    "text": "Nested Hierarchies\nA subtype can itself be an abstract type with its own subtypes by using &gt; again. Bare names (no parentheses) produce zero-field structs that inherit the parent’s type parameters:\n\n@types Animal2{T} &gt; (\n    Mammal{T}(family::T),\n    Invertebrate{T} &gt; (\n        Worm,\n        Insect{T, I &lt;: Integer}(legs::I, family::T)\n    )\n)\n\nsupertype(Invertebrate{Float64}), supertype(Worm{Float64})\n\n(Animal2{Float64}, Invertebrate{Float64})\n\n\n\nWorm{String}(), Insect{Float64, Int8}(6, 1.0)\n\n(Worm{String}(), Insect{Float64, Int8}(6, 1.0))",
+    "text": "Nested Hierarchies\nA subtype can itself be an abstract type with its own subtypes by using &gt; again. Bare names (no parentheses) produce zero-field structs that inherit the parent’s type parameters:\n\n@types Animal2{T} &gt; (\n    Mammal{T}(family::T),\n    Invertebrate{T} &gt; (\n        Worm,\n        Insect{T, I &lt;: Integer}(legs::I, family::T)\n    )\n)\n\nsupertype(Invertebrate{Float64}), supertype(Worm{Float64})\n\n(Animal2{Float64}, Invertebrate{Float64})\n\n\n\nWorm{String}(), Insect{Float64, Int8}(6, 1.0)\n\n(Worm{String}, Insect{Float64, Int8}(legs=6, family=1.0))",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
@@ -81,7 +81,7 @@
     "href": "getting-started.html#single-concrete-type",
     "title": "Getting Started",
     "section": "Single Concrete Type",
-    "text": "Single Concrete Type\nDefine a single struct without a hierarchy:\n\n@types Point(x::Float64, y::Float64)\nPoint(1.0, 2.0)\n\nPoint(1.0, 2.0)\n\n\nTo specify a supertype, use &lt;::\n\n@types Organism2\n@types Bacterium(name::String) &lt;: Organism2\n\nsupertype(Bacterium)\n\nOrganism2",
+    "text": "Single Concrete Type\nDefine a single struct without a hierarchy:\n\n@types Point(x::Float64, y::Float64)\nPoint(1.0, 2.0)\n\nPoint(x=1.0, y=2.0)\n\n\nTo specify a supertype, use &lt;::\n\n@types Organism2\n@types Bacterium(name::String) &lt;: Organism2\n\nsupertype(Bacterium)\n\nOrganism2",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
@@ -103,7 +103,7 @@
     "href": "api.html#functions",
     "title": "API",
     "section": "",
-    "text": "@types {#@types}\n\n\n@types AbstractType\n@types [mutable] ConcreteType(pos_fields...; kw_fields...)\n@types [mutable] ConcreteType(pos_fields...; kw_fields...) &lt;: SuperType\n@types [mutable] AbstractType &gt; (Subtype1(fields...), Subtype2(fields...))\n@types [mutable] AbstractType{T} &gt; (Subtype1{T}(fields...), Subtype2{T, S}(fields...))\nDefine abstract types, concrete structs, or full type hierarchies in one expression.\n\nmutable makes all generated concrete structs mutable.\nFields with default values (field::T = val) generate inner constructors for both positional-with-defaults and keyword argument construction.\nUse ; to separate positional fields from keyword-only fields, generating a single constructor that mirrors the exact positional/keyword split you specify.\nSubtypes can themselves use &gt; to define nested hierarchies.\nBare names (no parentheses) produce zero-field structs inheriting the parent’s type parameters.\n\n\nExamples\n@types Animal\n\n@types Cat(lives::Int)\n\n@types Dog(name::String) &lt;: Animal\n\n@types mutable Counter(n::Int = 0)\n\n@types Server(host::String; port::Int = 8080, timeout::Int = 30)\n\n@types Animal &gt; (\n    Cat(lives::Int),\n    Dog(name::String)\n)\n\n@types Animal{T} &gt; (\n    Cat{T}(lives::Int, family::T),\n    Dog{T, S &lt;: AbstractString}(name::S, family::T),\n    Invertebrate{T} &gt; (\n        Worm,\n        Insect{T, I &lt;: Integer}(legs::I, family::T)\n    )\n)",
+    "text": "@types {#@types}\n\n\n@types AbstractType\n@types [mutable] ConcreteType(pos_fields...; kw_fields...)\n@types [mutable] ConcreteType(pos_fields...; kw_fields...) &lt;: SuperType\n@types [mutable] ConcreteType(args...) = new(field::T = expr, ...)\n@types [mutable] AbstractType &gt; (Subtype1(fields...), Subtype2(fields...))\n@types [mutable] AbstractType{T} &gt; (Subtype1{T}(fields...), Subtype2{T, S}(fields...))\nDefine abstract types, concrete structs, or full type hierarchies in one expression.\n\nmutable makes all generated concrete structs mutable.\n@mutable SubType(...) makes an individual subtype mutable within a hierarchy.\n@const(field::T) marks a field as const within a @mutable or mutable type.\nFields with default values (field::T = val) generate inner constructors for both positional-with-defaults and keyword argument construction.\nUse ; to separate positional fields from keyword-only fields, generating a single constructor that mirrors the exact positional/keyword split you specify.\nSubtypes can themselves use &gt; to define nested hierarchies.\nBare names (no parentheses) produce zero-field structs inheriting the parent’s type parameters.\n@hide(field::T) suppresses a field from the auto-generated show method.\nComputed constructors (Name(args...) = new(field::T = expr, ...)) let you define struct fields that differ from the constructor arguments. Each new(...) argument must be field = expr or field::T = expr, where expr computes the stored value from the constructor args.\n@esc(expr) splices arbitrary code (e.g. interface methods) into the hierarchy output.\nEach concrete subtype gets an auto-generated docstring showing its hierarchy path and constructor signature (e.g. `“Animal &gt;\n\nDog(name::String)“`). Place a string literal immediately before a subtype entry to override it with a custom docstring.\n\nExamples\n@types Animal\n\n@types Cat(lives::Int)\n\n@types Dog(name::String) &lt;: Animal\n\n@types mutable Counter(n::Int = 0)\n\n@types Server(host::String; port::Int = 8080, timeout::Int = 30)\n\n@types Animal &gt; (\n    Cat(lives::Int),\n    Dog(name::String)\n)\n\n@types Animal &gt; (\n    Cat(lives::Int = 9),\n    @mutable Dog(@const(name::String), legs::Int)\n)\n\n# Custom docstrings: place a string before the entry to override the auto-generated doc\n@types Animal &gt; (\n    \"A feline with a fixed number of lives.\",\n    Cat(lives::Int = 9),\n    Dog(name::String),  # auto-doc: \"Animal &gt; \nDog(name::String)\"\n)\n\n# Computed constructor: struct fields differ from constructor args\n@types Point(x, y) = new(r::Float64 = hypot(x, y), θ::Float64 = atan(y, x))\n\n@types Animal{T} &gt; (\n    Cat{T}(lives::Int, family::T),\n    Dog{T, S &lt;: AbstractString}(name::S, family::T),\n    Invertebrate{T} &gt; (\n        Worm,\n        Insect{T, I &lt;: Integer}(legs::I, family::T)\n    )\n)",
     "crumbs": [
       "API",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
@@ -115,6 +115,72 @@
     "title": "Changelog",
     "section": "",
     "text": "Unreleased",
+    "crumbs": [
+      "Resources",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+    ]
+  },
+  {
+    "objectID": "resources/changelog.html#v0.2.4---2026-04-16",
+    "href": "resources/changelog.html#v0.2.4---2026-04-16",
+    "title": "Changelog",
+    "section": "v0.2.4 - 2026-04-16",
+    "text": "v0.2.4 - 2026-04-16\n\nFeatures\n\nAdd computed constructors to @types: new syntax Name(args...) = new(field::T = expr, ...) lets struct fields differ from constructor arguments. Works standalone, with &lt;: subtypes, in hierarchies, parametric types, and mutable variants.",
+    "crumbs": [
+      "Resources",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+    ]
+  },
+  {
+    "objectID": "resources/changelog.html#v0.2.3---2026-04-09",
+    "href": "resources/changelog.html#v0.2.3---2026-04-09",
+    "title": "Changelog",
+    "section": "v0.2.3 - 2026-04-09",
+    "text": "v0.2.3 - 2026-04-09\n\nFixes\n\nFix method overwrite error when using @mutable with @const fields and default values (keyword constructor now uses all-keyword args to avoid dispatch overlap)",
+    "crumbs": [
+      "Resources",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+    ]
+  },
+  {
+    "objectID": "resources/changelog.html#v0.2.2---2026-04-09",
+    "href": "resources/changelog.html#v0.2.2---2026-04-09",
+    "title": "Changelog",
+    "section": "v0.2.2 - 2026-04-09",
+    "text": "v0.2.2 - 2026-04-09\n\nFixes\n\nFix parametric types with default values or keyword arguments (outer constructors with where clauses for proper type inference)",
+    "crumbs": [
+      "Resources",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+    ]
+  },
+  {
+    "objectID": "resources/changelog.html#v0.2.1---2026-04-07",
+    "href": "resources/changelog.html#v0.2.1---2026-04-07",
+    "title": "Changelog",
+    "section": "v0.2.1 - 2026-04-07",
+    "text": "v0.2.1 - 2026-04-07\n\nFeatures\n\nSupport bare parametric subtypes in @types hierarchies (e.g. Multi{T} as a child type)\nSupport extending existing abstract types in @types hierarchies",
+    "crumbs": [
+      "Resources",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+    ]
+  },
+  {
+    "objectID": "resources/changelog.html#v0.2.0---2026-04-07",
+    "href": "resources/changelog.html#v0.2.0---2026-04-07",
+    "title": "Changelog",
+    "section": "v0.2.0 - 2026-04-07",
+    "text": "v0.2.0 - 2026-04-07\n\nFeatures\n\nAdd autoshow support (automatic display of type hierarchies)\nAdd auto-generated and user-defined docstrings to @types hierarchies\n\n\n\nBreaking\n\nRemove @show_types macro (replaced by autoshow)",
+    "crumbs": [
+      "Resources",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+    ]
+  },
+  {
+    "objectID": "resources/changelog.html#v0.1.0---2026-03-25",
+    "href": "resources/changelog.html#v0.1.0---2026-03-25",
+    "title": "Changelog",
+    "section": "v0.1.0 - 2026-03-25",
+    "text": "v0.1.0 - 2026-03-25\n\nFeatures\n\nAdd @qtype macro for defining structs with positional constructors\nAdd @abstract macro for defining abstract types\nAdd @types macro for displaying type hierarchies\nAdd @mutable per-subtype and @const field annotations for mutable struct support\nAdd @show_types macro for displaying type hierarchies\nSupport default field values and keyword argument constructors\n\n\n\nDocumentation\n\nAdd README with usage examples and comparison table against similar packages\nAdd package comparison table with per-package code examples and source line counts",
     "crumbs": [
       "Resources",
       "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"

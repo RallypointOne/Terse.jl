@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.36">
+<meta name="generator" content="quarto-1.9.38">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -76,10 +76,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-730002b28d11a81147b69cb58a38970d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-3793a09f727e4166f67f05d827e59191.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-68b744eed1efc7fcd6c9121c6d67ff94.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-b893fc932ab592bc8e51f35707c75ce9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -274,16 +274,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> AbstractType</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">ConcreteType</span>(pos_fields<span class="op">...</span>; kw_fields<span class="op">...</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">ConcreteType</span>(pos_fields<span class="op">...</span>; kw_fields<span class="op">...</span>) <span class="op">&lt;:</span><span class="dt"> SuperType</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] AbstractType <span class="op">&gt;</span> (<span class="fu">Subtype1</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span>(fields<span class="op">...</span>))</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">AbstractType</span><span class="dt">{T} </span>&gt; (<span class="fu">Subtype1</span><span class="dt">{T}</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span><span class="dt">{T, S}</span>(fields<span class="op">...</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">ConcreteType</span>(args<span class="op">...</span>) <span class="op">=</span> <span class="fu">new</span>(field<span class="op">::</span><span class="dt">T </span><span class="op">=</span> expr, <span class="op">...</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] AbstractType <span class="op">&gt;</span> (<span class="fu">Subtype1</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span>(fields<span class="op">...</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">AbstractType</span><span class="dt">{T} </span>&gt; (<span class="fu">Subtype1</span><span class="dt">{T}</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span><span class="dt">{T, S}</span>(fields<span class="op">...</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Define abstract types, concrete structs, or full type hierarchies in one expression.</p>
 <ul>
 <li><code>mutable</code> makes all generated concrete structs mutable.</li>
+<li><code>@mutable SubType(...)</code> makes an individual subtype mutable within a hierarchy.</li>
+<li><code>@const(field::T)</code> marks a field as const within a <code>@mutable</code> or <code>mutable</code> type.</li>
 <li>Fields with default values (<code>field::T = val</code>) generate inner constructors for both positional-with-defaults and keyword argument construction.</li>
 <li>Use <code>;</code> to separate positional fields from keyword-only fields, generating a single constructor that mirrors the exact positional/keyword split you specify.</li>
 <li>Subtypes can themselves use <code>&gt;</code> to define nested hierarchies.</li>
 <li>Bare names (no parentheses) produce zero-field structs inheriting the parent’s type parameters.</li>
+<li><code>@hide(field::T)</code> suppresses a field from the auto-generated <code>show</code> method.</li>
+<li>Computed constructors (<code>Name(args...) = new(field::T = expr, ...)</code>) let you define struct fields that differ from the constructor arguments. Each <code>new(...)</code> argument must be <code>field = expr</code> or <code>field::T = expr</code>, where <code>expr</code> computes the stored value from the constructor args.</li>
+<li><code>@esc(expr)</code> splices arbitrary code (e.g.&nbsp;interface methods) into the hierarchy output.</li>
+<li>Each concrete subtype gets an auto-generated docstring showing its hierarchy path and constructor signature (e.g.&nbsp;`“Animal &gt;</li>
 </ul>
+<p>Dog(name::String)“`). Place a string literal immediately before a subtype entry to override it with a custom docstring.</p>
 <section id="examples" class="level3">
 <h3 class="anchored" data-anchor-id="examples">Examples</h3>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal</span>
@@ -301,14 +309,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>)</span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span><span class="dt">{T}</span>(lives<span class="op">::</span><span class="dt">Int</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span><span class="dt">{T, S &lt;: AbstractString}</span>(name<span class="op">::</span><span class="dt">S</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    Invertebrate{T} <span class="op">&gt;</span> (</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        Worm,</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">Insect</span><span class="dt">{T, I &lt;: Integer}</span>(legs<span class="op">::</span><span class="dt">I</span>, family<span class="op">::</span><span class="dt">T</span>)</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal <span class="op">&gt;</span> (</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int </span><span class="op">=</span> <span class="fl">9</span>),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="pp">@mutable</span> <span class="fu">Dog</span>(<span class="pp">@const</span>(name<span class="op">::</span><span class="dt">String</span>), legs<span class="op">::</span><span class="dt">Int</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom docstrings: place a string before the entry to override the auto-generated doc</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal <span class="op">&gt;</span> (</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"A feline with a fixed number of lives."</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int </span><span class="op">=</span> <span class="fl">9</span>),</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>),  <span class="co"># auto-doc: "Animal &gt; </span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>)<span class="st">"</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Computed constructor: struct fields differ from constructor args</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">Point</span>(x, y) <span class="op">=</span> <span class="fu">new</span>(r<span class="op">::</span><span class="dt">Float64 </span><span class="op">=</span> <span class="fu">hypot</span>(x, y), θ<span class="op">::</span><span class="dt">Float64 </span><span class="op">=</span> <span class="fu">atan</span>(y, x))</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span><span class="dt">{T}</span>(lives<span class="op">::</span><span class="dt">Int</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span><span class="dt">{T, S &lt;: AbstractString}</span>(name<span class="op">::</span><span class="dt">S</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    Invertebrate{T} <span class="op">&gt;</span> (</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        Worm,</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="fu">Insect</span><span class="dt">{T, I &lt;: Integer}</span>(legs<span class="op">::</span><span class="dt">I</span>, family<span class="op">::</span><span class="dt">T</span>)</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </div>
 </div>
