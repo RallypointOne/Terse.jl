@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -206,10 +241,12 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#unreleased" id="toc-unreleased" class="nav-link active" data-scroll-target="#unreleased">Unreleased</a>
+  <li><a href="#unreleased" id="toc-unreleased" class="nav-link active" data-scroll-target="#unreleased">Unreleased</a></li>
+  <li><a href="#v0.3.0---2026-08-12" id="toc-v0.3.0---2026-08-12" class="nav-link" data-scroll-target="#v0.3.0---2026-08-12">v0.3.0 - 2026-08-12</a>
   <ul class="collapse">
   <li><a href="#breaking" id="toc-breaking" class="nav-link" data-scroll-target="#breaking">Breaking</a></li>
   <li><a href="#fixes" id="toc-fixes" class="nav-link" data-scroll-target="#fixes">Fixes</a></li>
+  <li><a href="#chores" id="toc-chores" class="nav-link" data-scroll-target="#chores">Chores</a></li>
   </ul></li>
   <li><a href="#v0.2.4---2026-04-16" id="toc-v0.2.4---2026-04-16" class="nav-link" data-scroll-target="#v0.2.4---2026-04-16">v0.2.4 - 2026-04-16</a>
   <ul class="collapse">
@@ -264,16 +301,29 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="unreleased" class="level2">
 <h2 class="anchored" data-anchor-id="unreleased">Unreleased</h2>
+</section>
+<section id="v0.3.0---2026-08-12" class="level2">
+<h2 class="anchored" data-anchor-id="v0.3.0---2026-08-12">v0.3.0 - 2026-08-12</h2>
 <section id="breaking" class="level3">
 <h3 class="anchored" data-anchor-id="breaking">Breaking</h3>
 <ul>
-<li>A bare name inside a <code>@types</code> hierarchy now declares an <strong>abstract</strong> type instead of a zero-field concrete struct, matching what a bare name already meant at the top level (<code>@types A</code>). Parentheses now consistently mark concrete types: use <code>Name()</code> or <code>Name{T}()</code> for a zero-field struct. A bare name still inherits the parent’s type parameters when it declares none.</li>
+<li><p>A bare name inside a <code>@types</code> hierarchy now declares an <strong>abstract</strong> type instead of a zero-field concrete struct, matching what a bare name already meant at the top level (<code>@types A</code>). Parentheses now consistently mark concrete types: use <code>Name()</code> or <code>Name{T}()</code> for a zero-field struct. A bare name still inherits the parent’s type parameters when it declares none.</p>
+<p>To migrate, add parentheses to any bare subtype you construct:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Shape <span class="op">&gt;</span> (Point, Line)      <span class="co"># before: two zero-field structs</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Shape <span class="op">&gt;</span> (<span class="fu">Point</span>(), <span class="fu">Line</span>())  <span class="co"># after</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
 </ul>
 </section>
 <section id="fixes" class="level3">
 <h3 class="anchored" data-anchor-id="fixes">Fixes</h3>
 <ul>
 <li>A custom docstring placed before a nested <code>&gt;</code> group or a bare name is no longer silently discarded; it is attached to the generated abstract type.</li>
+<li>The Docs workflow now deploys versioned docs on <code>v*</code> tag pushes. It previously listened only for published releases, but TagBot creates those with <code>GITHUB_TOKEN</code> and GitHub never starts a workflow run from a token-authored event, so no released version was ever published to <code>gh-pages</code>.</li>
+</ul>
+</section>
+<section id="chores" class="level3">
+<h3 class="anchored" data-anchor-id="chores">Chores</h3>
+<ul>
+<li>Sync CI and docs workflows with JuliaPackageTemplate: Julia <code>lts</code> in the test matrix, a docs render smoke test, and a single <code>CI success</code> aggregate check for branch protection.</li>
 </ul>
 </section>
 </section>

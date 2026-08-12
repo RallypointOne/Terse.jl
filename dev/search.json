@@ -132,11 +132,11 @@
     ]
   },
   {
-    "objectID": "resources/changelog.html#unreleased",
-    "href": "resources/changelog.html#unreleased",
+    "objectID": "resources/changelog.html#v0.3.0---2026-08-12",
+    "href": "resources/changelog.html#v0.3.0---2026-08-12",
     "title": "Changelog",
-    "section": "",
-    "text": "Breaking\n\nA bare name inside a @types hierarchy now declares an abstract type instead of a zero-field concrete struct, matching what a bare name already meant at the top level (@types A). Parentheses now consistently mark concrete types: use Name() or Name{T}() for a zero-field struct. A bare name still inherits the parent’s type parameters when it declares none.\n\n\n\nFixes\n\nA custom docstring placed before a nested &gt; group or a bare name is no longer silently discarded; it is attached to the generated abstract type.",
+    "section": "v0.3.0 - 2026-08-12",
+    "text": "v0.3.0 - 2026-08-12\n\nBreaking\n\nA bare name inside a @types hierarchy now declares an abstract type instead of a zero-field concrete struct, matching what a bare name already meant at the top level (@types A). Parentheses now consistently mark concrete types: use Name() or Name{T}() for a zero-field struct. A bare name still inherits the parent’s type parameters when it declares none.\nTo migrate, add parentheses to any bare subtype you construct:\n@types Shape &gt; (Point, Line)      # before: two zero-field structs\n@types Shape &gt; (Point(), Line())  # after\n\n\n\nFixes\n\nA custom docstring placed before a nested &gt; group or a bare name is no longer silently discarded; it is attached to the generated abstract type.\nThe Docs workflow now deploys versioned docs on v* tag pushes. It previously listened only for published releases, but TagBot creates those with GITHUB_TOKEN and GitHub never starts a workflow run from a token-authored event, so no released version was ever published to gh-pages.\n\n\n\nChores\n\nSync CI and docs workflows with JuliaPackageTemplate: Julia lts in the test matrix, a docs render smoke test, and a single CI success aggregate check for branch protection.",
     "crumbs": [
       "Resources",
       "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
