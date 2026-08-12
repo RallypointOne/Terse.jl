@@ -4,15 +4,15 @@
     "href": "index.html",
     "title": "Terse.jl",
     "section": "",
-    "text": "Installation\nTerse.jl provides the @types macro for defining Julia type hierarchies concisely.",
+    "text": "Overview\nTerse.jl provides the @types macro for defining Julia type hierarchies concisely.",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>Terse.jl</span>"
     ]
   },
   {
-    "objectID": "index.html#installation",
-    "href": "index.html#installation",
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
     "title": "Terse.jl",
     "section": "",
     "text": "using Pkg\nPkg.add(\"Terse\")",
