@@ -35,15 +35,13 @@ s.hollow = true      # mutable field
 s.radius = 1.0       # ERROR: const field
 ```
 
----
-
-**Standalone abstract type:**
+### Standalone abstract type
 
 ```julia
 @types Animal
 ```
 
-**Abstract type with concrete subtypes:**
+### Abstract type with concrete subtypes
 
 ```julia
 @types Animal > (
@@ -52,7 +50,7 @@ s.radius = 1.0       # ERROR: const field
 )
 ```
 
-**Parametric types with bounded type parameters:**
+### Parametric types with bounded type parameters
 
 ```julia
 @types Animal{T} > (
@@ -61,7 +59,7 @@ s.radius = 1.0       # ERROR: const field
 )
 ```
 
-**Nested hierarchies:**
+### Nested hierarchies
 
 ```julia
 @types Animal{T} > (
@@ -78,7 +76,7 @@ Parentheses decide abstract vs. concrete: a bare name declares an abstract type 
 the parent's type parameters when it declares none), while empty parentheses declare a
 zero-field concrete struct.
 
-**Single concrete type (with optional supertype):**
+### Single concrete type (with optional supertype)
 
 ```julia
 @types Point(x::Float64, y::Float64)
@@ -86,7 +84,7 @@ zero-field concrete struct.
 @types Wrapper{T}(value::T) <: Animal{T}
 ```
 
-**Per-type mutability and const fields:**
+### Per-type mutability and const fields
 
 Use `@mutable` to mark individual subtypes as mutable, and `@const(field)` to freeze
 specific fields within a mutable type (requires Julia 1.8+, explicit parentheses required):
@@ -102,7 +100,7 @@ d.legs = 3        # ok — legs is mutable
 d.name = "Spot"   # error — name is const
 ```
 
-**Hidden fields:**
+### Hidden fields
 
 Use `@hide(field)` to suppress a field from the auto-generated `show` method (the field is still part of the struct and constructor):
 
@@ -112,7 +110,7 @@ Use `@hide(field)` to suppress a field from the auto-generated `show` method (th
 Token("abc", UInt8[0x61, 0x62, 0x63])  # Token(value="abc")
 ```
 
-**Computed constructors:**
+### Computed constructors
 
 Use `= new(field::T = expr, ...)` when the struct's stored fields should differ from the constructor arguments. Each `new(...)` argument defines a struct field and how it's computed:
 
@@ -133,7 +131,7 @@ Works everywhere — standalone, with `<:`, in hierarchies, parametric, and muta
 @types Sum{T}(a::T, b::T) = new(total::T = a + b)
 ```
 
-**Escape hatch for arbitrary code:**
+### Escape hatch for arbitrary code
 
 Use `@esc(expr)` inside a hierarchy to splice arbitrary expressions (e.g. interface methods) into the output alongside the type definitions:
 
@@ -169,7 +167,9 @@ sound(Dog("Rex"))  # "woof"
 | Source lines | — | ~540 | ~670 | ~245 | ~280 |
 | Dependencies | — | 2 ᵇ | 2 ᶜ | 0 | 0 |
 
-<sub>ᵃ type parameters inferred automatically &nbsp;·&nbsp; ᵇ ConstructionBase, MacroTools &nbsp;·&nbsp; ᶜ OrderedCollections, UnPack</sub>
+<sub>ᵃ type parameters inferred automatically</sub><br>
+<sub>ᵇ ConstructionBase, MacroTools</sub><br>
+<sub>ᶜ OrderedCollections, UnPack</sub>
 
 [qt]: https://github.com/cstjean/QuickTypes.jl
 [par]: https://github.com/mauro3/Parameters.jl
@@ -177,7 +177,8 @@ sound(Dog("Rex"))  # "woof"
 
 Concrete example: an abstract `Animal` with a `Cat` (default `lives=9`) and a mutable `Dog` with a const `name` field:
 
-**Terse.jl**
+### Terse.jl
+
 ```julia
 @types Animal > (
     Cat(lives::Int = 9),
@@ -185,7 +186,10 @@ Concrete example: an abstract `Animal` with a `Cat` (default `lives=9`) and a mu
 )
 ```
 
-**[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl)** *(one type at a time; `@qmutable` has no const field support, falls back to plain Julia)*
+### [QuickTypes.jl][qt]
+
+*(one type at a time; `@qmutable` has no const field support, falls back to plain Julia)*
+
 ```julia
 abstract type Animal end
     
@@ -198,7 +202,10 @@ mutable struct Dog <: Animal
 end
 ```
 
-**[Parameters.jl](https://github.com/mauro3/Parameters.jl)** *(block syntax; no const field support in `@with_kw`, falls back to plain Julia)*
+### [Parameters.jl][par]
+
+*(block syntax; no const field support in `@with_kw`, falls back to plain Julia)*
+
 ```julia
 abstract type Animal end
     
@@ -213,7 +220,10 @@ mutable struct Dog <: Animal
 end
 ```
 
-**`Base.@kwdef`** *(no extra dependencies; no const field support in `@kwdef`, falls back to plain Julia)*
+### `Base.@kwdef`
+
+*(no extra dependencies; no const field support in `@kwdef`, falls back to plain Julia)*
+
 ```julia
 abstract type Animal end
     
