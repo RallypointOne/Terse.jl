@@ -260,11 +260,12 @@ function _is_existing_abstract(mod, name)
 end
 
 # Recursively generate abstract type + concrete subtypes for a `Parent > (children...)` hierarchy.
-function _types_impl(mod, abstract_expr, subtypes_expr, parent_head=nothing; is_mutable=false, docpath="")
+function _types_impl(mod, abstract_expr, subtypes_expr, parent_head=nothing; is_mutable=false, docpath="", doc=nothing)
     abstract_name, abstract_params = _terse_parse_type(abstract_expr)
     abstract_head = _build_curly(abstract_name, abstract_params)
     existing = _is_existing_abstract(mod, abstract_name)
     abstract_decl = existing ? nothing : Expr(:abstract, parent_head === nothing ? abstract_head : Expr(:<:, abstract_head, parent_head))
+    existing || doc === nothing || (abstract_decl = _wrap_doc(doc, abstract_decl))
     current_path = isempty(docpath) ? string(abstract_name) : docpath * " > " * string(abstract_name)
 
     children = Meta.isexpr(subtypes_expr, :tuple) ? subtypes_expr.args : [subtypes_expr]
@@ -294,17 +295,14 @@ function _types_impl(mod, abstract_expr, subtypes_expr, parent_head=nothing; is_
             append!(decls, _show_method_exprs(name))
             pending_doc = nothing
         elseif Meta.isexpr(st, :call) && st.args[1] == :>
-            push!(decls, _types_impl(mod, st.args[2], st.args[3], abstract_head; is_mutable=local_mutable, docpath=current_path))
+            push!(decls, _types_impl(mod, st.args[2], st.args[3], abstract_head; is_mutable=local_mutable, docpath=current_path, doc=pending_doc))
             pending_doc = nothing
         elseif st isa Symbol || Meta.isexpr(st, :curly)
+            # Bare name: an abstract subtype with no (yet) declared children.
             name, params = _terse_parse_type(st)
             params = isempty(params) ? abstract_params : params
-            result = _make_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), Any[])
-            s, outer = _split_struct(result)
-            doc = something(pending_doc, current_path * " > \n" * _autodoc_sig(name, params, Any[], Any[]))
-            push!(decls, _wrap_doc(doc, s))
-            append!(decls, outer)
-            append!(decls, _show_method_exprs(name))
+            push!(decls, _types_impl(mod, _build_curly(name, params), Expr(:tuple), abstract_head;
+                is_mutable=local_mutable, docpath=current_path, doc=pending_doc))
             pending_doc = nothing
         else
             name, params, pos_fields, kw_fields = _terse_parse_subtype(st)
@@ -388,7 +386,9 @@ Define abstract types, concrete structs, or full type hierarchies in one express
 - Use `;` to separate positional fields from keyword-only fields, generating a single
   constructor that mirrors the exact positional/keyword split you specify.
 - Subtypes can themselves use `>` to define nested hierarchies.
-- Bare names (no parentheses) produce zero-field structs inheriting the parent's type parameters.
+- Parentheses decide abstract vs. concrete: a bare name (`Worm`) declares an abstract type,
+  inheriting the parent's type parameters when it declares none; empty parentheses
+  (`Worm()`, `Worm{T}()`) declare a zero-field concrete struct.
 - `@hide(field::T)` suppresses a field from the auto-generated `show` method.
 - Computed constructors (`Name(args...) = new(field::T = expr, ...)`) let you define struct
   fields that differ from the constructor arguments. Each `new(...)` argument must be
@@ -436,7 +436,8 @@ Define abstract types, concrete structs, or full type hierarchies in one express
     Cat{T}(lives::Int, family::T),
     Dog{T, S <: AbstractString}(name::S, family::T),
     Invertebrate{T} > (
-        Worm,
+        Worm{T}(),                  # zero-field concrete struct
+        Mollusc,                    # abstract type Mollusc{T} <: Invertebrate{T}
         Insect{T, I <: Integer}(legs::I, family::T)
     )
 )

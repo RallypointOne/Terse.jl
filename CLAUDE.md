@@ -50,6 +50,7 @@
 
 - `api.qmd` must always be the last item before the "Reference" section in `_quarto.yml`
 - `api.qmd` lives in its own `part: "API"` to visually separate it from other doc pages
+- `index.qmd` must always begin with `## Overview` and `## Quickstart` sections
 
 # Style
 

@@ -67,11 +67,16 @@ s.radius = 1.0       # ERROR: const field
 @types Animal{T} > (
     Cat{T}(lives::Int, family::T),
     Invertebrate{T} > (
-        Worm,
+        Mollusc,                    # abstract type Mollusc{T} <: Invertebrate{T}
+        Worm{T}(),                  # struct Worm{T} <: Invertebrate{T}  (no fields)
         Insect{T, I <: Integer}(legs::I, family::T)
     )
 )
 ```
+
+Parentheses decide abstract vs. concrete: a bare name declares an abstract type (inheriting
+the parent's type parameters when it declares none), while empty parentheses declare a
+zero-field concrete struct.
 
 **Single concrete type (with optional supertype):**
 

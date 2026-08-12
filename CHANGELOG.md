@@ -1,5 +1,18 @@
 ## Unreleased
 
+### Breaking
+
+- A bare name inside a `@types` hierarchy now declares an **abstract** type instead of a
+  zero-field concrete struct, matching what a bare name already meant at the top level
+  (`@types A`). Parentheses now consistently mark concrete types: use `Name()` or
+  `Name{T}()` for a zero-field struct. A bare name still inherits the parent's type
+  parameters when it declares none.
+
+### Fixes
+
+- A custom docstring placed before a nested `>` group or a bare name is no longer silently
+  discarded; it is attached to the generated abstract type.
+
 ## v0.2.4 - 2026-04-16
 
 ### Features

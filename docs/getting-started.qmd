@@ -57,14 +57,13 @@ Labelled{Int, String}(42, "answer")
 
 ## Nested Hierarchies
 
-A subtype can itself be an abstract type with its own subtypes by using `>` again.
-Bare names (no parentheses) produce zero-field structs that inherit the parent's type parameters:
+A subtype can itself be an abstract type with its own subtypes by using `>` again:
 
 ```{julia}
 @types Animal2{T} > (
     Mammal{T}(family::T),
     Invertebrate{T} > (
-        Worm,
+        Worm{T}(),
         Insect{T, I <: Integer}(legs::I, family::T)
     )
 )
@@ -74,6 +73,28 @@ supertype(Invertebrate{Float64}), supertype(Worm{Float64})
 
 ```{julia}
 Worm{String}(), Insect{Float64, Int8}(6, 1.0)
+```
+
+## Abstract vs. Concrete
+
+Parentheses decide whether a name becomes an abstract type or a concrete struct — the same
+rule at the top level and inside a hierarchy. A bare name is abstract and inherits the
+parent's type parameters when it declares none; empty parentheses give a zero-field struct:
+
+```{julia}
+@types Tree > (
+    Branch,      # abstract type Branch <: Tree end
+    Leaf(),      # struct Leaf <: Tree end
+)
+
+isabstracttype(Branch), isabstracttype(Leaf)
+```
+
+`Branch` can then be extended later, either with another `@types` block or with `<:`:
+
+```{julia}
+@types Twig(length::Float64) <: Branch
+supertype(Twig)
 ```
 
 ## Single Concrete Type

@@ -36,7 +36,8 @@ using Test
             Cat2{T}(lives::Int, family::T),
             Dog2{T, S <: AbstractString}(name::S, family::T),
             Invertebrate{T} > (
-                Worm,
+                Worm{T}(),
+                Mollusc,
                 Insect{T, I <: Integer}(legs::I, family::T)
             )
         )
@@ -47,6 +48,10 @@ using Test
         @test supertype(Insect{Int, Int32}) === Invertebrate{Int}
         @test Worm{Float64}() isa Invertebrate{Float64}
         @test Insect{Int, Int32}(6, 1) isa Invertebrate{Int}
+        # Bare names are abstract and inherit the parent's type parameters
+        @test isabstracttype(Mollusc)
+        @test supertype(Mollusc{Int}) === Invertebrate{Int}
+        @test !isabstracttype(Worm)
     end
 
     @testset "@types single concrete type" begin
@@ -214,7 +219,7 @@ using Test
         @test repr(ShowRect(2.0, 3.0)) == "ShowRect(width=2.0, height=3.0)"
 
         # Zero-field type
-        @types ShowAnimal > (ShowCat, ShowDog)
+        @types ShowAnimal > (ShowCat(), ShowDog())
         @test repr(ShowCat()) == "ShowCat"
         @test repr(ShowDog()) == "ShowDog"
 
@@ -245,24 +250,45 @@ using Test
         @test repr(ShowMixed(1, "hi", [1,2,3])) == "ShowMixed(n=1, s=\"hi\", v=[1, 2, 3])"
     end
 
-    @testset "bare parametric subtypes" begin
+    @testset "zero-field subtypes" begin
         @types Geometry > (
-            GPoint,
+            GPoint(),
             GCurve > (
-                GLine,
-                GLineString,
+                GLine(),
+                GLineString(),
             ),
             GSurface > (
-                GPolygon,
+                GPolygon(),
             ),
             GGeometryCollection > (
-                GMulti{T}
+                GMulti{T}()
             )
         )
         @test supertype(GPoint) === Geometry
         @test supertype(GLine) === GCurve
         @test supertype(GMulti{Int}) === GGeometryCollection
         @test GMulti{String}() isa GGeometryCollection
+        @test all(!isabstracttype, (GPoint, GLine, GLineString, GPolygon, GMulti))
+    end
+
+    @testset "bare names are abstract" begin
+        @types BareTop > (
+            BareLeaf,
+            "A documented abstract leaf.",
+            BareDocLeaf,
+            BareBranch > (BareConcrete(x::Int),),
+        )
+        @test isabstracttype(BareTop)
+        @test isabstracttype(BareLeaf)
+        @test isabstracttype(BareDocLeaf)
+        @test supertype(BareLeaf) === BareTop
+        @test supertype(BareDocLeaf) === BareTop
+        @test supertype(BareConcrete) === BareBranch
+        @test occursin("A documented abstract leaf.", string(@doc(BareDocLeaf)))
+
+        # A bare name is a valid supertype for later definitions
+        @types BareLater(y::Int) <: BareLeaf
+        @test supertype(BareLater) === BareLeaf
     end
 
     @testset "@hide fields" begin
