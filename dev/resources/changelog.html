@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.38">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,10 +12,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -41,10 +44,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-3793a09f727e4166f67f05d827e59191.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-095245003bb80bd2beb305de39928752.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-b893fc932ab592bc8e51f35707c75ce9.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-3901d0d75e475d87cb004cd3e7ef4c9e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -203,18 +206,22 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#unreleased" id="toc-unreleased" class="nav-link active" data-scroll-target="#unreleased">Unreleased</a></li>
+  <li><a href="#unreleased" id="toc-unreleased" class="nav-link active" data-scroll-target="#unreleased">Unreleased</a>
+  <ul class="collapse">
+  <li><a href="#breaking" id="toc-breaking" class="nav-link" data-scroll-target="#breaking">Breaking</a></li>
+  <li><a href="#fixes" id="toc-fixes" class="nav-link" data-scroll-target="#fixes">Fixes</a></li>
+  </ul></li>
   <li><a href="#v0.2.4---2026-04-16" id="toc-v0.2.4---2026-04-16" class="nav-link" data-scroll-target="#v0.2.4---2026-04-16">v0.2.4 - 2026-04-16</a>
   <ul class="collapse">
   <li><a href="#features" id="toc-features" class="nav-link" data-scroll-target="#features">Features</a></li>
   </ul></li>
   <li><a href="#v0.2.3---2026-04-09" id="toc-v0.2.3---2026-04-09" class="nav-link" data-scroll-target="#v0.2.3---2026-04-09">v0.2.3 - 2026-04-09</a>
   <ul class="collapse">
-  <li><a href="#fixes" id="toc-fixes" class="nav-link" data-scroll-target="#fixes">Fixes</a></li>
+  <li><a href="#fixes-1" id="toc-fixes-1" class="nav-link" data-scroll-target="#fixes-1">Fixes</a></li>
   </ul></li>
   <li><a href="#v0.2.2---2026-04-09" id="toc-v0.2.2---2026-04-09" class="nav-link" data-scroll-target="#v0.2.2---2026-04-09">v0.2.2 - 2026-04-09</a>
   <ul class="collapse">
-  <li><a href="#fixes-1" id="toc-fixes-1" class="nav-link" data-scroll-target="#fixes-1">Fixes</a></li>
+  <li><a href="#fixes-2" id="toc-fixes-2" class="nav-link" data-scroll-target="#fixes-2">Fixes</a></li>
   </ul></li>
   <li><a href="#v0.2.1---2026-04-07" id="toc-v0.2.1---2026-04-07" class="nav-link" data-scroll-target="#v0.2.1---2026-04-07">v0.2.1 - 2026-04-07</a>
   <ul class="collapse">
@@ -223,7 +230,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#v0.2.0---2026-04-07" id="toc-v0.2.0---2026-04-07" class="nav-link" data-scroll-target="#v0.2.0---2026-04-07">v0.2.0 - 2026-04-07</a>
   <ul class="collapse">
   <li><a href="#features-2" id="toc-features-2" class="nav-link" data-scroll-target="#features-2">Features</a></li>
-  <li><a href="#breaking" id="toc-breaking" class="nav-link" data-scroll-target="#breaking">Breaking</a></li>
+  <li><a href="#breaking-1" id="toc-breaking-1" class="nav-link" data-scroll-target="#breaking-1">Breaking</a></li>
   </ul></li>
   <li><a href="#v0.1.0---2026-03-25" id="toc-v0.1.0---2026-03-25" class="nav-link" data-scroll-target="#v0.1.0---2026-03-25">v0.1.0 - 2026-03-25</a>
   <ul class="collapse">
@@ -257,6 +264,18 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="unreleased" class="level2">
 <h2 class="anchored" data-anchor-id="unreleased">Unreleased</h2>
+<section id="breaking" class="level3">
+<h3 class="anchored" data-anchor-id="breaking">Breaking</h3>
+<ul>
+<li>A bare name inside a <code>@types</code> hierarchy now declares an <strong>abstract</strong> type instead of a zero-field concrete struct, matching what a bare name already meant at the top level (<code>@types A</code>). Parentheses now consistently mark concrete types: use <code>Name()</code> or <code>Name{T}()</code> for a zero-field struct. A bare name still inherits the parent’s type parameters when it declares none.</li>
+</ul>
+</section>
+<section id="fixes" class="level3">
+<h3 class="anchored" data-anchor-id="fixes">Fixes</h3>
+<ul>
+<li>A custom docstring placed before a nested <code>&gt;</code> group or a bare name is no longer silently discarded; it is attached to the generated abstract type.</li>
+</ul>
+</section>
 </section>
 <section id="v0.2.4---2026-04-16" class="level2">
 <h2 class="anchored" data-anchor-id="v0.2.4---2026-04-16">v0.2.4 - 2026-04-16</h2>
@@ -269,8 +288,8 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="v0.2.3---2026-04-09" class="level2">
 <h2 class="anchored" data-anchor-id="v0.2.3---2026-04-09">v0.2.3 - 2026-04-09</h2>
-<section id="fixes" class="level3">
-<h3 class="anchored" data-anchor-id="fixes">Fixes</h3>
+<section id="fixes-1" class="level3">
+<h3 class="anchored" data-anchor-id="fixes-1">Fixes</h3>
 <ul>
 <li>Fix method overwrite error when using <code>@mutable</code> with <code>@const</code> fields and default values (keyword constructor now uses all-keyword args to avoid dispatch overlap)</li>
 </ul>
@@ -278,8 +297,8 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="v0.2.2---2026-04-09" class="level2">
 <h2 class="anchored" data-anchor-id="v0.2.2---2026-04-09">v0.2.2 - 2026-04-09</h2>
-<section id="fixes-1" class="level3">
-<h3 class="anchored" data-anchor-id="fixes-1">Fixes</h3>
+<section id="fixes-2" class="level3">
+<h3 class="anchored" data-anchor-id="fixes-2">Fixes</h3>
 <ul>
 <li>Fix parametric types with default values or keyword arguments (outer constructors with <code>where</code> clauses for proper type inference)</li>
 </ul>
@@ -304,8 +323,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Add auto-generated and user-defined docstrings to <code>@types</code> hierarchies</li>
 </ul>
 </section>
-<section id="breaking" class="level3">
-<h3 class="anchored" data-anchor-id="breaking">Breaking</h3>
+<section id="breaking-1" class="level3">
+<h3 class="anchored" data-anchor-id="breaking-1">Breaking</h3>
 <ul>
 <li>Remove <code>@show_types</code> macro (replaced by autoshow)</li>
 </ul>
