@@ -1,5 +1,7 @@
 ## Unreleased
 
+## v0.3.0 - 2026-08-12
+
 ### Breaking
 
 - A bare name inside a `@types` hierarchy now declares an **abstract** type instead of a
@@ -8,10 +10,26 @@
   `Name{T}()` for a zero-field struct. A bare name still inherits the parent's type
   parameters when it declares none.
 
+  To migrate, add parentheses to any bare subtype you construct:
+
+  ```julia
+  @types Shape > (Point, Line)      # before: two zero-field structs
+  @types Shape > (Point(), Line())  # after
+  ```
+
 ### Fixes
 
 - A custom docstring placed before a nested `>` group or a bare name is no longer silently
   discarded; it is attached to the generated abstract type.
+- The Docs workflow now deploys versioned docs on `v*` tag pushes. It previously listened
+  only for published releases, but TagBot creates those with `GITHUB_TOKEN` and GitHub
+  never starts a workflow run from a token-authored event, so no released version was ever
+  published to `gh-pages`.
+
+### Chores
+
+- Sync CI and docs workflows with JuliaPackageTemplate: Julia `lts` in the test matrix, a
+  docs render smoke test, and a single `CI success` aggregate check for branch protection.
 
 ## v0.2.4 - 2026-04-16
 
