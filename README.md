@@ -151,23 +151,29 @@ sound(Dog("Rex"))  # "woof"
 
 ## Comparison with Similar Packages
 
-| Feature | `Base.@kwdef` | [QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl) | [Parameters.jl](https://github.com/mauro3/Parameters.jl) | [ConcreteStructs.jl](https://github.com/SciML/ConcreteStructs.jl) | **Terse.jl** |
+| Feature | `@kwdef` | [Quick&shy;Types][qt] | [Param&shy;eters][par] | [Concrete&shy;Structs][cs] | **Terse** |
 |---|:---:|:---:|:---:|:---:|:---:|
-| Concise one-liner syntax | | ✓ | | ✓ | ✓ |
-| Default field values | ✓ | ✓ | ✓ | | ✓ |
+| Concise syntax | | ✓ | | ✓ | ✓ |
+| Default values | ✓ | ✓ | ✓ | | ✓ |
 | Keyword constructors | ✓ | ✓ | ✓ | | ✓ |
 | Mutable structs | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Parametric types | ✓ | ✓ | ✓ | ✓ (auto-inferred) | ✓ |
-| Define abstract supertypes | | | | | ✓ |
-| Full type hierarchy in one expression | | | | | ✓ |
-| Nested abstract hierarchies | | | | | ✓ |
+| Parametric types | ✓ | ✓ | ✓ | ✓ ᵃ | ✓ |
+| Abstract supertypes | | | | | ✓ |
+| Whole hierarchy at once | | | | | ✓ |
+| Nested hierarchies | | | | | ✓ |
 | Per-type mutability | | | | | ✓ |
-| Const fields (Julia 1.8+) | | | | | ✓ |
+| Const fields | | | | | ✓ |
 | Computed constructors | | | | | ✓ |
-| Hidden fields (`@hide`) | | | | | ✓ |
-| Escape hatch (`@esc`) | | | | | ✓ |
+| Hidden fields | | | | | ✓ |
+| Escape hatch | | | | | ✓ |
 | Source lines | — | ~540 | ~670 | ~245 | ~280 |
-| Dependencies | — | ConstructionBase, MacroTools | OrderedCollections, UnPack | none | none |
+| Dependencies | — | 2 ᵇ | 2 ᶜ | 0 | 0 |
+
+<sub>ᵃ type parameters inferred automatically &nbsp;·&nbsp; ᵇ ConstructionBase, MacroTools &nbsp;·&nbsp; ᶜ OrderedCollections, UnPack</sub>
+
+[qt]: https://github.com/cstjean/QuickTypes.jl
+[par]: https://github.com/mauro3/Parameters.jl
+[cs]: https://github.com/SciML/ConcreteStructs.jl
 
 Concrete example: an abstract `Animal` with a `Cat` (default `lives=9`) and a mutable `Dog` with a const `name` field:
 
@@ -182,7 +188,9 @@ Concrete example: an abstract `Animal` with a `Cat` (default `lives=9`) and a mu
 **[QuickTypes.jl](https://github.com/cstjean/QuickTypes.jl)** *(one type at a time; `@qmutable` has no const field support, falls back to plain Julia)*
 ```julia
 abstract type Animal end
+    
 @qstruct Cat(lives::Int = 9) <: Animal
+
 mutable struct Dog <: Animal
     const name::String
     pointy_ears::Bool
@@ -193,9 +201,11 @@ end
 **[Parameters.jl](https://github.com/mauro3/Parameters.jl)** *(block syntax; no const field support in `@with_kw`, falls back to plain Julia)*
 ```julia
 abstract type Animal end
+    
 @with_kw struct Cat <: Animal
     lives::Int = 9
 end
+
 mutable struct Dog <: Animal
     const name::String
     pointy_ears::Bool
@@ -206,9 +216,11 @@ end
 **`Base.@kwdef`** *(no extra dependencies; no const field support in `@kwdef`, falls back to plain Julia)*
 ```julia
 abstract type Animal end
+    
 Base.@kwdef struct Cat <: Animal
     lives::Int = 9
 end
+
 mutable struct Dog <: Animal
     const name::String
     pointy_ears::Bool
