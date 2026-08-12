@@ -3,9 +3,9 @@ title: "Terse.jl"
 engine: julia
 ---
 
-Terse.jl provides the `@types` macro for defining Julia type hierarchies concisely.
+## Overview
 
-## Installation
+Terse.jl provides the `@types` macro for defining Julia type hierarchies concisely.
 
 ```julia
 using Pkg
