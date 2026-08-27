@@ -99,6 +99,39 @@
     ]
   },
   {
+    "objectID": "comparison.html",
+    "href": "comparison.html",
+    "title": "Comparison",
+    "section": "",
+    "text": "Feature Matrix\nJulia has several macros for cutting boilerplate out of struct definitions. This page compares Terse.jl with Base.@kwdef, QuickTypes.jl, Parameters.jl, and ConcreteStructs.jl.\nᵃ type parameters inferred automatically ᵇ ConstructionBase, MacroTools ᶜ OrderedCollections, UnPack",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Comparison</span>"
+    ]
+  },
+  {
+    "objectID": "comparison.html#feature-matrix",
+    "href": "comparison.html#feature-matrix",
+    "title": "Comparison",
+    "section": "",
+    "text": "Feature\n@kwdef\nQuick­Types\nParam­eters\nConcrete­Structs\nTerse\n\n\n\n\nConcise syntax\n\n✓\n\n✓\n✓\n\n\nDefault values\n✓\n✓\n✓\n\n✓\n\n\nKeyword constructors\n✓\n✓\n✓\n\n✓\n\n\nMutable structs\n✓\n✓\n✓\n✓\n✓\n\n\nParametric types\n✓\n✓\n✓\n✓ ᵃ\n✓\n\n\nAbstract supertypes\n\n\n\n\n✓\n\n\nWhole hierarchy at once\n\n\n\n\n✓\n\n\nNested hierarchies\n\n\n\n\n✓\n\n\nPer-type mutability\n\n\n\n\n✓\n\n\nConst fields\n\n\n\n\n✓\n\n\nComputed constructors\n\n\n\n\n✓\n\n\nHidden fields\n\n\n\n\n✓\n\n\nEscape hatch\n\n\n\n\n✓\n\n\nSource lines\n—\n~540\n~670\n~245\n~280\n\n\nDependencies\n—\n2 ᵇ\n2 ᶜ\n0\n0",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Comparison</span>"
+    ]
+  },
+  {
+    "objectID": "comparison.html#side-by-side-examples",
+    "href": "comparison.html#side-by-side-examples",
+    "title": "Comparison",
+    "section": "Side by Side Examples",
+    "text": "Side by Side Examples\nThe same hierarchy written five ways: an abstract Animal with a Cat (default lives = 9) and a mutable Dog with a const name field and a keyword argument.\n\nTerse.jl\n\nusing Terse\n\n@types Animal &gt; (\n    Cat(lives::Int = 9),\n    @mutable Dog(@const(name::String); pointy_ears::Bool = true)\n)\n\nCat(), Dog(\"Rex\")\n\n(Cat(lives=9), Dog(name=\"Rex\", pointy_ears=true))\n\n\n\n\nQuickTypes.jl\nOne type at a time; @qmutable has no const field support, so Dog falls back to plain Julia.\nabstract type Animal end\n\n@qstruct Cat(lives::Int = 9) &lt;: Animal\n\nmutable struct Dog &lt;: Animal\n    const name::String\n    pointy_ears::Bool\n    Dog(name::String; pointy_ears::Bool = true) = new(name, pointy_ears)\nend\n\n\nParameters.jl\nBlock syntax; no const field support in @with_kw.\nabstract type Animal end\n\n@with_kw struct Cat &lt;: Animal\n    lives::Int = 9\nend\n\nmutable struct Dog &lt;: Animal\n    const name::String\n    pointy_ears::Bool\n    Dog(name::String; pointy_ears::Bool = true) = new(name, pointy_ears)\nend\n\n\nBase.@kwdef\nNo extra dependencies; no const field support in @kwdef.\nabstract type Animal end\n\nBase.@kwdef struct Cat &lt;: Animal\n    lives::Int = 9\nend\n\nmutable struct Dog &lt;: Animal\n    const name::String\n    pointy_ears::Bool\n    Dog(name::String; pointy_ears::Bool = true) = new(name, pointy_ears)\nend\n\n\nConcreteStructs.jl\n@concrete infers type parameters from untyped fields rather than generating constructors, so defaults, keyword arguments, and const fields are all written by hand.\nabstract type Animal end\n\n@concrete struct Cat &lt;: Animal\n    lives\nend\nCat() = Cat(9)\n\nmutable struct Dog &lt;: Animal\n    const name::String\n    pointy_ears::Bool\n    Dog(name::String; pointy_ears::Bool = true) = new(name, pointy_ears)\nend",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Comparison</span>"
+    ]
+  },
+  {
     "objectID": "api.html",
     "href": "api.html",
     "title": "API",
@@ -106,7 +139,7 @@
     "text": "Functions",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -117,7 +150,7 @@
     "text": "@types {#@types}\n\n\n@types AbstractType\n@types [mutable] ConcreteType(pos_fields...; kw_fields...)\n@types [mutable] ConcreteType(pos_fields...; kw_fields...) &lt;: SuperType\n@types [mutable] ConcreteType(args...) = new(field::T = expr, ...)\n@types [mutable] AbstractType &gt; (Subtype1(fields...), Subtype2(fields...))\n@types [mutable] AbstractType{T} &gt; (Subtype1{T}(fields...), Subtype2{T, S}(fields...))\nDefine abstract types, concrete structs, or full type hierarchies in one expression.\n\nmutable makes all generated concrete structs mutable.\n@mutable SubType(...) makes an individual subtype mutable within a hierarchy.\n@const(field::T) marks a field as const within a @mutable or mutable type.\nFields with default values (field::T = val) generate inner constructors for both positional-with-defaults and keyword argument construction.\nUse ; to separate positional fields from keyword-only fields, generating a single constructor that mirrors the exact positional/keyword split you specify.\nSubtypes can themselves use &gt; to define nested hierarchies.\nParentheses decide abstract vs. concrete: a bare name (Worm) declares an abstract type, inheriting the parent’s type parameters when it declares none; empty parentheses (Worm(), Worm{T}()) declare a zero-field concrete struct.\n@hide(field::T) suppresses a field from the auto-generated show method.\nComputed constructors (Name(args...) = new(field::T = expr, ...)) let you define struct fields that differ from the constructor arguments. Each new(...) argument must be field = expr or field::T = expr, where expr computes the stored value from the constructor args.\n@esc(expr) splices arbitrary code (e.g. interface methods) into the hierarchy output.\nEach concrete subtype gets an auto-generated docstring showing its hierarchy path and constructor signature (e.g. `“Animal &gt;\n\nDog(name::String)“`). Place a string literal immediately before a subtype entry to override it with a custom docstring.\n\nExamples\n@types Animal\n\n@types Cat(lives::Int)\n\n@types Dog(name::String) &lt;: Animal\n\n@types mutable Counter(n::Int = 0)\n\n@types Server(host::String; port::Int = 8080, timeout::Int = 30)\n\n@types Animal &gt; (\n    Cat(lives::Int),\n    Dog(name::String)\n)\n\n@types Animal &gt; (\n    Cat(lives::Int = 9),\n    @mutable Dog(@const(name::String), legs::Int)\n)\n\n# Custom docstrings: place a string before the entry to override the auto-generated doc\n@types Animal &gt; (\n    \"A feline with a fixed number of lives.\",\n    Cat(lives::Int = 9),\n    Dog(name::String),  # auto-doc: \"Animal &gt; \nDog(name::String)\"\n)\n\n# Computed constructor: struct fields differ from constructor args\n@types Point(x, y) = new(r::Float64 = hypot(x, y), θ::Float64 = atan(y, x))\n\n@types Animal{T} &gt; (\n    Cat{T}(lives::Int, family::T),\n    Dog{T, S &lt;: AbstractString}(name::S, family::T),\n    Invertebrate{T} &gt; (\n        Worm{T}(),                  # zero-field concrete struct\n        Mollusc,                    # abstract type Mollusc{T} &lt;: Invertebrate{T}\n        Insect{T, I &lt;: Integer}(legs::I, family::T)\n    )\n)",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -128,7 +161,7 @@
     "text": "Unreleased",
     "crumbs": [
       "Resources",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
     ]
   },
   {
@@ -139,7 +172,7 @@
     "text": "v0.3.0 - 2026-08-12\n\nBreaking\n\nA bare name inside a @types hierarchy now declares an abstract type instead of a zero-field concrete struct, matching what a bare name already meant at the top level (@types A). Parentheses now consistently mark concrete types: use Name() or Name{T}() for a zero-field struct. A bare name still inherits the parent’s type parameters when it declares none.\nTo migrate, add parentheses to any bare subtype you construct:\n@types Shape &gt; (Point, Line)      # before: two zero-field structs\n@types Shape &gt; (Point(), Line())  # after\n\n\n\nFixes\n\nA custom docstring placed before a nested &gt; group or a bare name is no longer silently discarded; it is attached to the generated abstract type.\nThe Docs workflow now deploys versioned docs on v* tag pushes. It previously listened only for published releases, but TagBot creates those with GITHUB_TOKEN and GitHub never starts a workflow run from a token-authored event, so no released version was ever published to gh-pages.\n\n\n\nChores\n\nSync CI and docs workflows with JuliaPackageTemplate: Julia lts in the test matrix, a docs render smoke test, and a single CI success aggregate check for branch protection.",
     "crumbs": [
       "Resources",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
     ]
   },
   {
@@ -150,7 +183,7 @@
     "text": "v0.2.4 - 2026-04-16\n\nFeatures\n\nAdd computed constructors to @types: new syntax Name(args...) = new(field::T = expr, ...) lets struct fields differ from constructor arguments. Works standalone, with &lt;: subtypes, in hierarchies, parametric types, and mutable variants.",
     "crumbs": [
       "Resources",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
     ]
   },
   {
@@ -161,7 +194,7 @@
     "text": "v0.2.3 - 2026-04-09\n\nFixes\n\nFix method overwrite error when using @mutable with @const fields and default values (keyword constructor now uses all-keyword args to avoid dispatch overlap)",
     "crumbs": [
       "Resources",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
     ]
   },
   {
@@ -172,7 +205,7 @@
     "text": "v0.2.2 - 2026-04-09\n\nFixes\n\nFix parametric types with default values or keyword arguments (outer constructors with where clauses for proper type inference)",
     "crumbs": [
       "Resources",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
     ]
   },
   {
@@ -183,7 +216,7 @@
     "text": "v0.2.1 - 2026-04-07\n\nFeatures\n\nSupport bare parametric subtypes in @types hierarchies (e.g. Multi{T} as a child type)\nSupport extending existing abstract types in @types hierarchies",
     "crumbs": [
       "Resources",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
     ]
   },
   {
@@ -194,7 +227,7 @@
     "text": "v0.2.0 - 2026-04-07\n\nFeatures\n\nAdd autoshow support (automatic display of type hierarchies)\nAdd auto-generated and user-defined docstrings to @types hierarchies\n\n\n\nBreaking\n\nRemove @show_types macro (replaced by autoshow)",
     "crumbs": [
       "Resources",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
     ]
   },
   {
@@ -205,7 +238,7 @@
     "text": "v0.1.0 - 2026-03-25\n\nFeatures\n\nAdd @qtype macro for defining structs with positional constructors\nAdd @abstract macro for defining abstract types\nAdd @types macro for displaying type hierarchies\nAdd @mutable per-subtype and @const field annotations for mutable struct support\nAdd @show_types macro for displaying type hierarchies\nSupport default field values and keyword argument constructors\n\n\n\nDocumentation\n\nAdd README with usage examples and comparison table against similar packages\nAdd package comparison table with per-package code examples and source line counts",
     "crumbs": [
       "Resources",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
     ]
   }
 ]
