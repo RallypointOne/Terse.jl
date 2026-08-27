@@ -28,6 +28,7 @@ book:
       chapters:
         - index.qmd
         - getting-started.qmd
+        - comparison.qmd
     - part: "API"
       chapters:
         - api.qmd
