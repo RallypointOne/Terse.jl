@@ -41,7 +41,7 @@ for (kind, label) in [(:type, "Types"), (:function, "Functions"), (:macro, "Macr
         doc = string(Docs.doc(binding))
         println("""
         <details class="card mb-3 api-card">
-        <summary class="card-header api-item-header"><h4 id="$(anchor(name))"><code>$name</code></h4></summary>
+        <summary class="card-header api-item-header"><h4 id="$(anchor(name))">`$name`</h4></summary>
 
         ::: {.card-body}
         $doc
