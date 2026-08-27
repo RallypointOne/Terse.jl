@@ -2,6 +2,8 @@
 *.jl.*.cov
 *.jl.mem
 coverage/
+docs/pages/lcov.info
+docs/pages/coverage/
 Manifest.toml
 docs/Manifest.toml
 docs/build/
@@ -12,10 +14,4 @@ docs/_site
 docs/site_libs
 docs/.quarto/
 docs/*_files/
-docs/coverage/
 **/*.quarto_ipynb
-*.html
-benchmark/results.json
-benchmark/Manifest.toml
-.benchmark-worktree/
-*.jpg
