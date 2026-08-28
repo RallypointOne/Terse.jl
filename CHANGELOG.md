@@ -1,5 +1,7 @@
 ## Unreleased
 
+## v0.4.0 - 2026-08-28
+
 ### Breaking
 
 - Every subtype of a parametric parent must now declare the parent's type parameters. A bare
