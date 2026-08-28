@@ -1,0 +1,1 @@
+genhtml -t 'on branch (detached from 04fc1f8)' -o /home/runner/work/Terse.jl/Terse.jl/docs/pages/coverage coverage/lcov.info
