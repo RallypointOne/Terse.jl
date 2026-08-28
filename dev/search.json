@@ -165,11 +165,11 @@
     ]
   },
   {
-    "objectID": "pages/changelog.html#unreleased",
-    "href": "pages/changelog.html#unreleased",
+    "objectID": "pages/changelog.html#v0.4.0---2026-08-28",
+    "href": "pages/changelog.html#v0.4.0---2026-08-28",
     "title": "Changelog",
-    "section": "",
-    "text": "Breaking\n\nEvery subtype of a parametric parent must now declare the parent’s type parameters. A bare name no longer silently inherits them, and omitting them elsewhere raises a @types error naming the type instead of an UndefVarError from the generated code:\n@types Animal{T} &gt; (Mollusc,)     # before: abstract type Mollusc{T} &lt;: Animal{T}\n@types Animal{T} &gt; (Mollusc{T},)  # after\n\n@types Animal{T} &gt; (Cat(lives::Int),)     # before: UndefVarError: `T` not defined\n@types Animal{T} &gt; (Cat{T}(lives::Int),)  # after",
+    "section": "v0.4.0 - 2026-08-28",
+    "text": "v0.4.0 - 2026-08-28\n\nBreaking\n\nEvery subtype of a parametric parent must now declare the parent’s type parameters. A bare name no longer silently inherits them, and omitting them elsewhere raises a @types error naming the type instead of an UndefVarError from the generated code:\n@types Animal{T} &gt; (Mollusc,)     # before: abstract type Mollusc{T} &lt;: Animal{T}\n@types Animal{T} &gt; (Mollusc{T},)  # after\n\n@types Animal{T} &gt; (Cat(lives::Int),)     # before: UndefVarError: `T` not defined\n@types Animal{T} &gt; (Cat{T}(lives::Int),)  # after",
     "crumbs": [
       "Resources",
       "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
