@@ -246,10 +246,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#unreleased" id="toc-unreleased" class="nav-link active" data-scroll-target="#unreleased">Unreleased</a></li>
-  <li><a href="#v0.3.0---2026-08-12" id="toc-v0.3.0---2026-08-12" class="nav-link" data-scroll-target="#v0.3.0---2026-08-12">v0.3.0 - 2026-08-12</a>
+  <li><a href="#unreleased" id="toc-unreleased" class="nav-link active" data-scroll-target="#unreleased">Unreleased</a>
   <ul class="collapse">
   <li><a href="#breaking" id="toc-breaking" class="nav-link" data-scroll-target="#breaking">Breaking</a></li>
+  </ul></li>
+  <li><a href="#v0.3.0---2026-08-12" id="toc-v0.3.0---2026-08-12" class="nav-link" data-scroll-target="#v0.3.0---2026-08-12">v0.3.0 - 2026-08-12</a>
+  <ul class="collapse">
+  <li><a href="#breaking-1" id="toc-breaking-1" class="nav-link" data-scroll-target="#breaking-1">Breaking</a></li>
   <li><a href="#fixes" id="toc-fixes" class="nav-link" data-scroll-target="#fixes">Fixes</a></li>
   <li><a href="#chores" id="toc-chores" class="nav-link" data-scroll-target="#chores">Chores</a></li>
   </ul></li>
@@ -272,7 +275,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#v0.2.0---2026-04-07" id="toc-v0.2.0---2026-04-07" class="nav-link" data-scroll-target="#v0.2.0---2026-04-07">v0.2.0 - 2026-04-07</a>
   <ul class="collapse">
   <li><a href="#features-2" id="toc-features-2" class="nav-link" data-scroll-target="#features-2">Features</a></li>
-  <li><a href="#breaking-1" id="toc-breaking-1" class="nav-link" data-scroll-target="#breaking-1">Breaking</a></li>
+  <li><a href="#breaking-2" id="toc-breaking-2" class="nav-link" data-scroll-target="#breaking-2">Breaking</a></li>
   </ul></li>
   <li><a href="#v0.1.0---2026-03-25" id="toc-v0.1.0---2026-03-25" class="nav-link" data-scroll-target="#v0.1.0---2026-03-25">v0.1.0 - 2026-03-25</a>
   <ul class="collapse">
@@ -306,16 +309,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="unreleased" class="level2">
 <h2 class="anchored" data-anchor-id="unreleased">Unreleased</h2>
-</section>
-<section id="v0.3.0---2026-08-12" class="level2">
-<h2 class="anchored" data-anchor-id="v0.3.0---2026-08-12">v0.3.0 - 2026-08-12</h2>
 <section id="breaking" class="level3">
 <h3 class="anchored" data-anchor-id="breaking">Breaking</h3>
 <ul>
+<li><p>Every subtype of a parametric parent must now declare the parent’s type parameters. A bare name no longer silently inherits them, and omitting them elsewhere raises a <code>@types</code> error naming the type instead of an <code>UndefVarError</code> from the generated code:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (Mollusc,)     <span class="co"># before: abstract type Mollusc{T} &lt;: Animal{T}</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (Mollusc{T},)  <span class="co"># after</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (<span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int</span>),)     <span class="co"># before: UndefVarError: `T` not defined</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">Animal</span><span class="dt">{T} </span>&gt; (<span class="fu">Cat</span><span class="dt">{T}</span>(lives<span class="op">::</span><span class="dt">Int</span>),)  <span class="co"># after</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+</ul>
+</section>
+</section>
+<section id="v0.3.0---2026-08-12" class="level2">
+<h2 class="anchored" data-anchor-id="v0.3.0---2026-08-12">v0.3.0 - 2026-08-12</h2>
+<section id="breaking-1" class="level3">
+<h3 class="anchored" data-anchor-id="breaking-1">Breaking</h3>
+<ul>
 <li><p>A bare name inside a <code>@types</code> hierarchy now declares an <strong>abstract</strong> type instead of a zero-field concrete struct, matching what a bare name already meant at the top level (<code>@types A</code>). Parentheses now consistently mark concrete types: use <code>Name()</code> or <code>Name{T}()</code> for a zero-field struct. A bare name still inherits the parent’s type parameters when it declares none.</p>
 <p>To migrate, add parentheses to any bare subtype you construct:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Shape <span class="op">&gt;</span> (Point, Line)      <span class="co"># before: two zero-field structs</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Shape <span class="op">&gt;</span> (<span class="fu">Point</span>(), <span class="fu">Line</span>())  <span class="co"># after</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Shape <span class="op">&gt;</span> (Point, Line)      <span class="co"># before: two zero-field structs</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Shape <span class="op">&gt;</span> (<span class="fu">Point</span>(), <span class="fu">Line</span>())  <span class="co"># after</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
 </ul>
 </section>
 <section id="fixes" class="level3">
@@ -378,8 +392,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Add auto-generated and user-defined docstrings to <code>@types</code> hierarchies</li>
 </ul>
 </section>
-<section id="breaking-1" class="level3">
-<h3 class="anchored" data-anchor-id="breaking-1">Breaking</h3>
+<section id="breaking-2" class="level3">
+<h3 class="anchored" data-anchor-id="breaking-2">Breaking</h3>
 <ul>
 <li>Remove <code>@show_types</code> macro (replaced by autoshow)</li>
 </ul>

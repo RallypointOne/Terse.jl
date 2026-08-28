@@ -303,7 +303,8 @@ Close all
 <li>Fields with default values (<code>field::T = val</code>) generate inner constructors for both positional-with-defaults and keyword argument construction.</li>
 <li>Use <code>;</code> to separate positional fields from keyword-only fields, generating a single constructor that mirrors the exact positional/keyword split you specify.</li>
 <li>Subtypes can themselves use <code>&gt;</code> to define nested hierarchies.</li>
-<li>Parentheses decide abstract vs.&nbsp;concrete: a bare name (<code>Worm</code>) declares an abstract type, inheriting the parent’s type parameters when it declares none; empty parentheses (<code>Worm()</code>, <code>Worm{T}()</code>) declare a zero-field concrete struct.</li>
+<li>Parentheses decide abstract vs.&nbsp;concrete: a bare name (<code>Worm</code>) declares an abstract type, while empty parentheses (<code>Worm()</code>, <code>Worm{T}()</code>) declare a zero-field concrete struct.</li>
+<li>Every subtype of a parametric parent must declare the parent’s type parameters (<code>Mollusc{T}</code>, not <code>Mollusc</code>).</li>
 <li><code>@hide(field::T)</code> suppresses a field from the auto-generated <code>show</code> method.</li>
 <li>Computed constructors (<code>Name(args...) = new(field::T = expr, ...)</code>) let you define struct fields that differ from the constructor arguments. Each <code>new(...)</code> argument must be <code>field = expr</code> or <code>field::T = expr</code>, where <code>expr</code> computes the stored value from the constructor args.</li>
 <li><code>@esc(expr)</code> splices arbitrary code (e.g.&nbsp;interface methods) into the hierarchy output.</li>
@@ -348,7 +349,7 @@ Close all
 <span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span><span class="dt">{T, S &lt;: AbstractString}</span>(name<span class="op">::</span><span class="dt">S</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
 <span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    Invertebrate{T} <span class="op">&gt;</span> (</span>
 <span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="fu">Worm</span><span class="dt">{T}</span>(),                  <span class="co"># zero-field concrete struct</span></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        Mollusc,                    <span class="co"># abstract type Mollusc{T} &lt;: Invertebrate{T}</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        Mollusc{T},                 <span class="co"># abstract type Mollusc{T} &lt;: Invertebrate{T}</span></span>
 <span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        <span class="fu">Insect</span><span class="dt">{T, I &lt;: Integer}</span>(legs<span class="op">::</span><span class="dt">I</span>, family<span class="op">::</span><span class="dt">T</span>)</span>
 <span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
