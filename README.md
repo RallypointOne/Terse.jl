@@ -1,4 +1,7 @@
 [![CI](https://github.com/RallypointOne/Terse.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/RallypointOne/Terse.jl/actions/workflows/CI.yml)
+[![Docs Build](https://github.com/RallypointOne/Terse.jl/actions/workflows/Docs.yml/badge.svg)](https://github.com/RallypointOne/Terse.jl/actions/workflows/Docs.yml)
+[![Stable Docs](https://img.shields.io/badge/docs-stable-blue)](https://RallypointOne.github.io/Terse.jl/stable/)
+[![Dev Docs](https://img.shields.io/badge/docs-dev-blue)](https://RallypointOne.github.io/Terse.jl/dev/)
 
 # Terse.jl
 
@@ -145,95 +148,4 @@ Use `@esc(expr)` inside a hierarchy to splice arbitrary expressions (e.g. interf
 
 sound(Cat(9))   # "meow"
 sound(Dog("Rex"))  # "woof"
-```
-
-## Comparison with Similar Packages
-
-| Feature | `@kwdef` | [Quick&shy;Types][qt] | [Param&shy;eters][par] | [Concrete&shy;Structs][cs] | **Terse** |
-|---|:---:|:---:|:---:|:---:|:---:|
-| Concise syntax | | ✓ | | ✓ | ✓ |
-| Default values | ✓ | ✓ | ✓ | | ✓ |
-| Keyword constructors | ✓ | ✓ | ✓ | | ✓ |
-| Mutable structs | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Parametric types | ✓ | ✓ | ✓ | ✓ ᵃ | ✓ |
-| Abstract supertypes | | | | | ✓ |
-| Whole hierarchy at once | | | | | ✓ |
-| Nested hierarchies | | | | | ✓ |
-| Per-type mutability | | | | | ✓ |
-| Const fields | | | | | ✓ |
-| Computed constructors | | | | | ✓ |
-| Hidden fields | | | | | ✓ |
-| Escape hatch | | | | | ✓ |
-| Source lines | — | ~540 | ~670 | ~245 | ~280 |
-| Dependencies | — | 2 ᵇ | 2 ᶜ | 0 | 0 |
-
-<sub>ᵃ type parameters inferred automatically</sub><br>
-<sub>ᵇ ConstructionBase, MacroTools</sub><br>
-<sub>ᶜ OrderedCollections, UnPack</sub>
-
-[qt]: https://github.com/cstjean/QuickTypes.jl
-[par]: https://github.com/mauro3/Parameters.jl
-[cs]: https://github.com/SciML/ConcreteStructs.jl
-
-Concrete example: an abstract `Animal` with a `Cat` (default `lives=9`) and a mutable `Dog` with a const `name` field:
-
-### Terse.jl
-
-```julia
-@types Animal > (
-    Cat(lives::Int = 9),
-    @mutable Dog(@const(name::String); pointy_ears::Bool = true)
-)
-```
-
-### [QuickTypes.jl][qt]
-
-*(one type at a time; `@qmutable` has no const field support, falls back to plain Julia)*
-
-```julia
-abstract type Animal end
-    
-@qstruct Cat(lives::Int = 9) <: Animal
-
-mutable struct Dog <: Animal
-    const name::String
-    pointy_ears::Bool
-    Dog(name::String; pointy_ears::Bool = true) = new(name, pointy_ears)
-end
-```
-
-### [Parameters.jl][par]
-
-*(block syntax; no const field support in `@with_kw`, falls back to plain Julia)*
-
-```julia
-abstract type Animal end
-    
-@with_kw struct Cat <: Animal
-    lives::Int = 9
-end
-
-mutable struct Dog <: Animal
-    const name::String
-    pointy_ears::Bool
-    Dog(name::String; pointy_ears::Bool = true) = new(name, pointy_ears)
-end
-```
-
-### `Base.@kwdef`
-
-*(no extra dependencies; no const field support in `@kwdef`, falls back to plain Julia)*
-
-```julia
-abstract type Animal end
-    
-Base.@kwdef struct Cat <: Animal
-    lives::Int = 9
-end
-
-mutable struct Dog <: Animal
-    const name::String
-    pointy_ears::Bool
-    Dog(name::String; pointy_ears::Bool = true) = new(name, pointy_ears)
-end
 ```

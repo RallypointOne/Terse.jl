@@ -26,4 +26,4 @@ using Terse
 Circle(1.0), Rectangle(3.0, 4.0)
 ```
 
-See [Getting Started](getting-started.qmd) for a full overview of all supported syntax forms.
+See [Getting Started](pages/getting-started.qmd) for a full overview of all supported syntax forms.
