@@ -37,7 +37,7 @@ using Test
             Dog2{T, S <: AbstractString}(name::S, family::T),
             Invertebrate{T} > (
                 Worm{T}(),
-                Mollusc,
+                Mollusc{T},
                 Insect{T, I <: Integer}(legs::I, family::T)
             )
         )
@@ -48,7 +48,7 @@ using Test
         @test supertype(Insect{Int, Int32}) === Invertebrate{Int}
         @test Worm{Float64}() isa Invertebrate{Float64}
         @test Insect{Int, Int32}(6, 1) isa Invertebrate{Int}
-        # Bare names are abstract and inherit the parent's type parameters
+        # Bare names are abstract; parametric parents require explicit parameters
         @test isabstracttype(Mollusc)
         @test supertype(Mollusc{Int}) === Invertebrate{Int}
         @test !isabstracttype(Worm)
@@ -289,6 +289,42 @@ using Test
         # A bare name is a valid supertype for later definitions
         @types BareLater(y::Int) <: BareLeaf
         @test supertype(BareLater) === BareLeaf
+
+    end
+
+    @testset "parametric parents require declared parameters" begin
+        msg(ex) = try
+            @eval $ex
+            ""
+        catch e
+            e isa LoadError ? e.error.msg : sprint(showerror, e)
+        end
+        @test occursin("write `PC1{T}`", msg(:(@types PP1{T} > (PC1,))))                     # bare name
+        @test occursin("write `PC2{T}`", msg(:(@types PP2{T} > (PC2(x::Int),))))             # concrete
+        @test occursin("write `PC3{T}`", msg(:(@types PP3{T} > (PC3(),))))                   # zero-field
+        @test occursin("write `PC4{T, S}`", msg(:(@types PP4{T} > (PC4{S}(x::S),))))         # own params only
+        @test occursin("write `PC5{T}`", msg(:(@types PP5{T} > (PC5 > (PD5{T}(x::T),),))))   # nested `>`
+        @test occursin("write `PC6{T}`", msg(:(@types PP6{T} > (PC6(x) = new(y::Int = x),))))  # computed ctor
+        @test occursin("write `PC7{T, S <: Integer}`", msg(:(@types PP7{T} > (PC7{S <: Integer}(y::S),))))
+
+        # Declaring the parameters (in any order) is accepted
+        @types PPOk{T} > (
+            POkA{T}(x::T),
+            POkB{S <: Integer, T}(x::T, y::S),
+            POkBare{T},
+            POkNest{T} > (POkLeaf{T}(x::T),),
+            POkNew{T}(x::T) = new(w::T = x),
+        )
+        @test supertype(POkA{Int}) === PPOk{Int}
+        @test supertype(POkB{Int8, Int}) === PPOk{Int}
+        @test supertype(POkBare{Int}) === PPOk{Int}
+        @test supertype(POkLeaf{Int}) === POkNest{Int}
+        @test POkNew{Int}(3).w == 3
+
+        # Non-parametric parents are unaffected
+        @types PPPlain > (PPlainBare, PPlainLeaf(x::Int))
+        @test supertype(PPlainBare) === PPPlain
+        @test supertype(PPlainLeaf) === PPPlain
     end
 
     @testset "@hide fields" begin

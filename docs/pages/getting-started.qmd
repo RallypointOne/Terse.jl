@@ -55,6 +55,14 @@ Type parameters and bounds work as normal Julia syntax inside `{}`:
 Labelled{Int, String}(42, "answer")
 ```
 
+Every subtype must declare its parent's parameters — `Plain{T}`, not `Plain`. Omitting them
+is an error naming the type and the correct spelling:
+
+```julia
+@types Envelope{T} > (Plain(value::T),)
+# ERROR: @types: `Plain` must declare its parent's type parameters: write `Plain{T}`
+```
+
 ## Nested Hierarchies
 
 A subtype can itself be an abstract type with its own subtypes by using `>` again:
@@ -78,8 +86,8 @@ Worm{String}(), Insect{Float64, Int8}(6, 1.0)
 ## Abstract vs. Concrete
 
 Parentheses decide whether a name becomes an abstract type or a concrete struct — the same
-rule at the top level and inside a hierarchy. A bare name is abstract and inherits the
-parent's type parameters when it declares none; empty parentheses give a zero-field struct:
+rule at the top level and inside a hierarchy. A bare name is abstract; empty parentheses
+give a zero-field struct:
 
 ```{julia}
 @types Tree > (
