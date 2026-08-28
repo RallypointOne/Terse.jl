@@ -132,6 +132,15 @@ _sig_params(sig) = (inner = Meta.isexpr(sig, :<:) ? sig.args[1] : sig;
 # Strip bounds from a type parameter: `T <: Integer` → `T`.
 _param_name(p) = Meta.isexpr(p, :<:) ? p.args[1] : p
 
+# Every type parameter of a parametric parent must be declared by each of its subtypes.
+function _check_parent_params(name, params, parent_params)
+    declared = _param_name.(params)
+    missed = filter(p -> !(_param_name(p) in declared), parent_params)
+    isempty(missed) && return
+    suggestion = _build_curly(name, Any[_param_name.(missed); params])
+    error("@types: `$name` must declare its parent's type parameters: write `$suggestion`")
+end
+
 # Parse `Name(fields...; kw_fields...)` into (name, params, pos_fields, kw_fields).
 function _terse_parse_subtype(ex)
     Meta.isexpr(ex, :call) || error("@types: expected `TypeName(fields...)`, got: $ex")
@@ -285,6 +294,7 @@ function _types_impl(mod, abstract_expr, subtypes_expr, parent_head=nothing; is_
         if _is_computed_ctor(st)
             ctor_expr, new_call = st.args[1], _unwrap_block(st.args[2])
             name, params = _terse_parse_type(ctor_expr.args[1])
+            _check_parent_params(name, params, abstract_params)
             ctor_args = ctor_expr.args[2:end]
             new_fields = new_call.args[2:end]
             result = _make_computed_struct(local_mutable, Expr(:<:, _build_curly(name, params), abstract_head), ctor_args, new_fields)
@@ -295,17 +305,19 @@ function _types_impl(mod, abstract_expr, subtypes_expr, parent_head=nothing; is_
             append!(decls, _show_method_exprs(name))
             pending_doc = nothing
         elseif Meta.isexpr(st, :call) && st.args[1] == :>
+            _check_parent_params(_terse_parse_type(st.args[2])..., abstract_params)
             push!(decls, _types_impl(mod, st.args[2], st.args[3], abstract_head; is_mutable=local_mutable, docpath=current_path, doc=pending_doc))
             pending_doc = nothing
         elseif st isa Symbol || Meta.isexpr(st, :curly)
             # Bare name: an abstract subtype with no (yet) declared children.
             name, params = _terse_parse_type(st)
-            params = isempty(params) ? abstract_params : params
+            _check_parent_params(name, params, abstract_params)
             push!(decls, _types_impl(mod, _build_curly(name, params), Expr(:tuple), abstract_head;
                 is_mutable=local_mutable, docpath=current_path, doc=pending_doc))
             pending_doc = nothing
         else
             name, params, pos_fields, kw_fields = _terse_parse_subtype(st)
+            _check_parent_params(name, params, abstract_params)
             pos_fields, hidden_pos = _strip_hidden(pos_fields)
             kw_fields, hidden_kw = _strip_hidden(kw_fields)
             hidden = [hidden_pos; hidden_kw]
@@ -387,8 +399,9 @@ Define abstract types, concrete structs, or full type hierarchies in one express
   constructor that mirrors the exact positional/keyword split you specify.
 - Subtypes can themselves use `>` to define nested hierarchies.
 - Parentheses decide abstract vs. concrete: a bare name (`Worm`) declares an abstract type,
-  inheriting the parent's type parameters when it declares none; empty parentheses
-  (`Worm()`, `Worm{T}()`) declare a zero-field concrete struct.
+  while empty parentheses (`Worm()`, `Worm{T}()`) declare a zero-field concrete struct.
+- Every subtype of a parametric parent must declare the parent's type parameters
+  (`Mollusc{T}`, not `Mollusc`).
 - `@hide(field::T)` suppresses a field from the auto-generated `show` method.
 - Computed constructors (`Name(args...) = new(field::T = expr, ...)`) let you define struct
   fields that differ from the constructor arguments. Each `new(...)` argument must be
@@ -437,7 +450,7 @@ Define abstract types, concrete structs, or full type hierarchies in one express
     Dog{T, S <: AbstractString}(name::S, family::T),
     Invertebrate{T} > (
         Worm{T}(),                  # zero-field concrete struct
-        Mollusc,                    # abstract type Mollusc{T} <: Invertebrate{T}
+        Mollusc{T},                 # abstract type Mollusc{T} <: Invertebrate{T}
         Insect{T, I <: Integer}(legs::I, family::T)
     )
 )

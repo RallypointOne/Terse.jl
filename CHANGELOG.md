@@ -1,5 +1,19 @@
 ## Unreleased
 
+### Breaking
+
+- Every subtype of a parametric parent must now declare the parent's type parameters. A bare
+  name no longer silently inherits them, and omitting them elsewhere raises a `@types` error
+  naming the type instead of an `UndefVarError` from the generated code:
+
+  ```julia
+  @types Animal{T} > (Mollusc,)     # before: abstract type Mollusc{T} <: Animal{T}
+  @types Animal{T} > (Mollusc{T},)  # after
+
+  @types Animal{T} > (Cat(lives::Int),)     # before: UndefVarError: `T` not defined
+  @types Animal{T} > (Cat{T}(lives::Int),)  # after
+  ```
+
 ## v0.3.0 - 2026-08-12
 
 ### Breaking
