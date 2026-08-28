@@ -1,1 +1,0 @@
-genhtml -t 'on branch main' -o /home/runner/work/Terse.jl/Terse.jl/docs/resources/coverage coverage/lcov.info

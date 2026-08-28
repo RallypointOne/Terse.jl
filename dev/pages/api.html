@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Coverage – Terse.jl</title>
+<title>API – Terse.jl</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -36,17 +71,18 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../resources/changelog.html" rel="prev">
+<link href="../pages/changelog.html" rel="next">
+<link href="../pages/comparison.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-095245003bb80bd2beb305de39928752.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-73b0ff3878a4e6fc3716dc69a6aaefa3.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-1fea2c51d21c7813f291f492b4a412d2.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-75457b1ed21a3fdd221c49358c654c3f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -73,7 +109,7 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../assets/styles.css">
 </head>
 
 <body class="nav-sidebar floating nav-fixed quarto-light">
@@ -84,8 +120,8 @@ ul.task-list li input[type="checkbox"] {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="https://rallypoint1.com" class="navbar-brand navbar-brand-logo">
-    <img src="https://github.com/user-attachments/assets/f7216152-0d6e-4459-8e65-b9ed59421638" alt="" class="navbar-logo light-content">
-    <img src="https://github.com/user-attachments/assets/f7216152-0d6e-4459-8e65-b9ed59421638" alt="" class="navbar-logo dark-content">
+    <img src="../assets/logo.svg" alt="" class="navbar-logo light-content">
+    <img src="../assets/logo.svg" alt="" class="navbar-logo dark-content">
     </a>
     <a class="navbar-brand" href="https://rallypoint1.com">
     <span class="navbar-title">Terse.jl</span>
@@ -117,7 +153,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../resources/changelog.html">Resources</a></li><li class="breadcrumb-item"><a href="../resources/coverage.html"><span class="chapter-title">Coverage</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../pages/api.html">API</a></li><li class="breadcrumb-item"><a href="../pages/api.html"><span class="chapter-title">API</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -153,12 +189,12 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../getting-started.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Getting Started</span></a>
+  <a href="../pages/getting-started.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Getting Started</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../comparison.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Comparison</span></a>
+  <a href="../pages/comparison.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Comparison</span></a>
   </div>
 </li>
       </ul>
@@ -174,7 +210,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">API</span></a>
+  <a href="../pages/api.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">API</span></a>
   </div>
 </li>
       </ul>
@@ -190,12 +226,12 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../resources/changelog.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Changelog</span></a>
+  <a href="../pages/changelog.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Changelog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../resources/coverage.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Coverage</span></a>
+  <a href="../pages/coverage.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Coverage</span></a>
   </div>
 </li>
       </ul>
@@ -205,15 +241,21 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#macros" id="toc-macros" class="nav-link active" data-scroll-target="#macros">Macros</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../resources/changelog.html">Resources</a></li><li class="breadcrumb-item"><a href="../resources/coverage.html"><span class="chapter-title">Coverage</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../pages/api.html">API</a></li><li class="breadcrumb-item"><a href="../pages/api.html"><span class="chapter-title">API</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-title">Coverage</span></h1>
+<h1 class="title"><span class="chapter-title">API</span></h1>
 </div>
 
 
@@ -230,22 +272,115 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<iframe id="coverage-iframe" src="coverage/index.html" width="100%" style="border:none; overflow:hidden;" scrolling="no">
-</iframe>
+<div class="api-controls">
+<button type="button" class="btn btn-sm btn-outline-secondary" data-api-toggle="open">
+Open all
+</button>
+<button type="button" class="btn btn-sm btn-outline-secondary" data-api-toggle="close">
+Close all
+</button>
+</div>
+<section id="macros" class="level2">
+<h2 class="anchored" data-anchor-id="macros">Macros</h2>
+<details class="card mb-3 api-card">
+<summary class="card-header api-item-header">
+<h4 id="macro-types" class="anchored">
+<code>@types</code>
+</h4>
+</summary>
+<div class="card-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> AbstractType</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">ConcreteType</span>(pos_fields<span class="op">...</span>; kw_fields<span class="op">...</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">ConcreteType</span>(pos_fields<span class="op">...</span>; kw_fields<span class="op">...</span>) <span class="op">&lt;:</span><span class="dt"> SuperType</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">ConcreteType</span>(args<span class="op">...</span>) <span class="op">=</span> <span class="fu">new</span>(field<span class="op">::</span><span class="dt">T </span><span class="op">=</span> expr, <span class="op">...</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] AbstractType <span class="op">&gt;</span> (<span class="fu">Subtype1</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span>(fields<span class="op">...</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> [mutable] <span class="fu">AbstractType</span><span class="dt">{T} </span>&gt; (<span class="fu">Subtype1</span><span class="dt">{T}</span>(fields<span class="op">...</span>), <span class="fu">Subtype2</span><span class="dt">{T, S}</span>(fields<span class="op">...</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Define abstract types, concrete structs, or full type hierarchies in one expression.</p>
+<ul>
+<li><code>mutable</code> makes all generated concrete structs mutable.</li>
+<li><code>@mutable SubType(...)</code> makes an individual subtype mutable within a hierarchy.</li>
+<li><code>@const(field::T)</code> marks a field as const within a <code>@mutable</code> or <code>mutable</code> type.</li>
+<li>Fields with default values (<code>field::T = val</code>) generate inner constructors for both positional-with-defaults and keyword argument construction.</li>
+<li>Use <code>;</code> to separate positional fields from keyword-only fields, generating a single constructor that mirrors the exact positional/keyword split you specify.</li>
+<li>Subtypes can themselves use <code>&gt;</code> to define nested hierarchies.</li>
+<li>Parentheses decide abstract vs.&nbsp;concrete: a bare name (<code>Worm</code>) declares an abstract type, inheriting the parent’s type parameters when it declares none; empty parentheses (<code>Worm()</code>, <code>Worm{T}()</code>) declare a zero-field concrete struct.</li>
+<li><code>@hide(field::T)</code> suppresses a field from the auto-generated <code>show</code> method.</li>
+<li>Computed constructors (<code>Name(args...) = new(field::T = expr, ...)</code>) let you define struct fields that differ from the constructor arguments. Each <code>new(...)</code> argument must be <code>field = expr</code> or <code>field::T = expr</code>, where <code>expr</code> computes the stored value from the constructor args.</li>
+<li><code>@esc(expr)</code> splices arbitrary code (e.g.&nbsp;interface methods) into the hierarchy output.</li>
+<li>Each concrete subtype gets an auto-generated docstring showing its hierarchy path and constructor signature (e.g.&nbsp;`“Animal &gt;</li>
+</ul>
+<p>Dog(name::String)“`). Place a string literal immediately before a subtype entry to override it with a custom docstring.</p>
+<section id="examples" class="level3">
+<h3 class="anchored" data-anchor-id="examples">Examples</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>) <span class="op">&lt;:</span><span class="dt"> Animal</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> mutable <span class="fu">Counter</span>(n<span class="op">::</span><span class="dt">Int </span><span class="op">=</span> <span class="fl">0</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">Server</span>(host<span class="op">::</span><span class="dt">String</span>; port<span class="op">::</span><span class="dt">Int </span><span class="op">=</span> <span class="fl">8080</span>, timeout<span class="op">::</span><span class="dt">Int </span><span class="op">=</span> <span class="fl">30</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal <span class="op">&gt;</span> (</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int</span>),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal <span class="op">&gt;</span> (</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int </span><span class="op">=</span> <span class="fl">9</span>),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="pp">@mutable</span> <span class="fu">Dog</span>(<span class="pp">@const</span>(name<span class="op">::</span><span class="dt">String</span>), legs<span class="op">::</span><span class="dt">Int</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Custom docstrings: place a string before the entry to override the auto-generated doc</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal <span class="op">&gt;</span> (</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"A feline with a fixed number of lives."</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span>(lives<span class="op">::</span><span class="dt">Int </span><span class="op">=</span> <span class="fl">9</span>),</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>),  <span class="co"># auto-doc: "Animal &gt; </span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="fu">Dog</span>(name<span class="op">::</span><span class="dt">String</span>)<span class="st">"</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Computed constructor: struct fields differ from constructor args</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> <span class="fu">Point</span>(x, y) <span class="op">=</span> <span class="fu">new</span>(r<span class="op">::</span><span class="dt">Float64 </span><span class="op">=</span> <span class="fu">hypot</span>(x, y), θ<span class="op">::</span><span class="dt">Float64 </span><span class="op">=</span> <span class="fu">atan</span>(y, x))</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="pp">@types</span> Animal{T} <span class="op">&gt;</span> (</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Cat</span><span class="dt">{T}</span>(lives<span class="op">::</span><span class="dt">Int</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Dog</span><span class="dt">{T, S &lt;: AbstractString}</span>(name<span class="op">::</span><span class="dt">S</span>, family<span class="op">::</span><span class="dt">T</span>),</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    Invertebrate{T} <span class="op">&gt;</span> (</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="fu">Worm</span><span class="dt">{T}</span>(),                  <span class="co"># zero-field concrete struct</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        Mollusc,                    <span class="co"># abstract type Mollusc{T} &lt;: Invertebrate{T}</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        <span class="fu">Insect</span><span class="dt">{T, I &lt;: Integer}</span>(legs<span class="op">::</span><span class="dt">I</span>, family<span class="op">::</span><span class="dt">T</span>)</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</div>
+</details>
 <script>
 (function() {
-    var iframe = document.getElementById('coverage-iframe');
-    function resize() {
-        try {
-            iframe.style.height = iframe.contentDocument.documentElement.scrollHeight + 'px';
-        } catch(e) {}
+    document.querySelectorAll("[data-api-toggle]").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            var open = btn.dataset.apiToggle === "open";
+            document.querySelectorAll("details.api-card").forEach(function(d) { d.open = open; });
+        });
+    });
+
+    // Browsers do not expand a closed <details> when navigating to an id inside it,
+    // so a deep link or search hit would otherwise land on a collapsed card.
+    function revealTarget() {
+        var id = decodeURIComponent(location.hash.slice(1));
+        var el = id && document.getElementById(id);
+        var card = el && el.closest("details.api-card");
+        // Expanding only adds content below the summary, so the browser's own
+        // scroll to the anchor stays correct.
+        if (card) card.open = true;
     }
-    iframe.addEventListener('load', resize);
-    window.addEventListener('resize', resize);
+    revealTarget();
+    window.addEventListener("hashchange", revealTarget);
 })();
 </script>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -650,11 +785,14 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../resources/changelog.html" class="pagination-link" aria-label="Changelog">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Changelog</span></span>
+      <a href="../pages/comparison.html" class="pagination-link" aria-label="Comparison">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Comparison</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="../pages/changelog.html" class="pagination-link" aria-label="Changelog">
+        <span class="nav-page-text"><span class="chapter-title">Changelog</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->
@@ -673,22 +811,15 @@ ul.task-list li input[type="checkbox"] {
 </footer>
 <script>
 (function() {
-    // Detect repo name and current version from URL path
-    // Deployed: /{repoName}/{version}/...
-    // Local preview: /page.html (no repo/version segments)
-    var pathParts = window.location.pathname.split('/').filter(Boolean);
-    var isLocal = pathParts.length < 2 || !pathParts[0].includes('.');
-    var currentVersion, basePath;
-
-    if (pathParts.length >= 2 && pathParts[1].match(/^(dev|stable|v\d)/)) {
-        currentVersion = pathParts[1];
-        basePath = '/' + pathParts[0] + '/';
-    } else {
-        currentVersion = 'dev';
-        basePath = '/';
+    // Injected per-version by .github/workflows/Docs.yml at deploy time.
+    // Local preview: placeholders aren't substituted; fall back to sensible defaults.
+    var CURRENT_VERSION = "dev";
+    var BASE_PATH = "/Terse.jl/";
+    if (CURRENT_VERSION.indexOf("__") === 0) {
+        CURRENT_VERSION = "dev";
+        BASE_PATH = "/";
     }
 
-    // Build dropdown HTML
     function buildDropdown(versions) {
         var navbar = document.querySelector('.navbar-nav.navbar-nav-scroll.ms-auto');
         if (!navbar) return;
@@ -697,25 +828,22 @@ ul.task-list li input[type="checkbox"] {
         li.className = 'nav-item dropdown';
         li.innerHTML =
             '<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">' +
-                currentVersion +
+                CURRENT_VERSION +
             '</a>' +
             '<ul class="dropdown-menu dropdown-menu-end"></ul>';
 
         var menu = li.querySelector('.dropdown-menu');
 
-        // Always add dev and stable
-        var fixed = ['stable', 'dev'];
-        fixed.forEach(function(v) {
+        ['stable', 'dev'].forEach(function(v) {
             var a = document.createElement('a');
-            a.className = 'dropdown-item' + (v === currentVersion ? ' active' : '');
-            a.href = basePath + v + '/';
+            a.className = 'dropdown-item' + (v === CURRENT_VERSION ? ' active' : '');
+            a.href = BASE_PATH + v + '/';
             a.textContent = v;
             var item = document.createElement('li');
             item.appendChild(a);
             menu.appendChild(item);
         });
 
-        // Add release versions from versions.json
         if (versions && versions.length > 0) {
             var divider = document.createElement('li');
             divider.innerHTML = '<hr class="dropdown-divider">';
@@ -723,8 +851,8 @@ ul.task-list li input[type="checkbox"] {
 
             versions.forEach(function(v) {
                 var a = document.createElement('a');
-                a.className = 'dropdown-item' + (v === currentVersion ? ' active' : '');
-                a.href = basePath + v + '/';
+                a.className = 'dropdown-item' + (v === CURRENT_VERSION ? ' active' : '');
+                a.href = BASE_PATH + v + '/';
                 a.textContent = v;
                 var item = document.createElement('li');
                 item.appendChild(a);
@@ -734,45 +862,38 @@ ul.task-list li input[type="checkbox"] {
 
         navbar.prepend(li);
 
-        // Show outdated version banner
-        if (versions && versions.length > 0 && currentVersion !== 'stable' && currentVersion !== 'dev') {
-            var latest = versions[0]; // versions.json is sorted descending
-            if (currentVersion !== latest) {
+        if (versions && versions.length > 0 && CURRENT_VERSION !== 'stable' && CURRENT_VERSION !== 'dev') {
+            var latest = versions[0];
+            if (CURRENT_VERSION !== latest) {
                 var banner = document.createElement('div');
                 banner.className = 'alert alert-warning text-center mb-0 rounded-0';
                 banner.setAttribute('role', 'alert');
-                banner.innerHTML = 'You are viewing docs for <strong>' + currentVersion + '</strong>. ' +
-                    'The latest stable release is <a href="' + basePath + 'stable/" class="alert-link">' + latest + '</a>.';
+                banner.innerHTML = 'You are viewing docs for <strong>' + CURRENT_VERSION + '</strong>. ' +
+                    'The latest stable release is <a href="' + BASE_PATH + 'stable/" class="alert-link">' + latest + '</a>.';
                 document.body.prepend(banner);
             }
         }
     }
 
-    // Fetch versions.json, then build dropdown
-    fetch(basePath + 'versions.json')
+    fetch(BASE_PATH + 'versions.json')
         .then(function(res) { return res.ok ? res.json() : []; })
         .catch(function() { return []; })
         .then(buildDropdown);
 
-    // Fix navbar-brand title link to point to docs home (logo stays external)
     var titleLink = document.querySelector('a.navbar-brand:not(.navbar-brand-logo)');
     if (titleLink) {
-        titleLink.href = basePath + currentVersion + '/';
+        titleLink.href = BASE_PATH + CURRENT_VERSION + '/';
     }
 
-    // Fetch star count from GitHub API
     var starLink = document.querySelector('a.nav-link[href*="/stargazers"]');
     if (starLink) {
         var match = starLink.href.match(/github\.com\/([^/]+\/[^/]+)\/stargazers/);
         if (match) {
-            fetch('https://api.github.com/repos/' + match[1])
-                .then(function(res) { return res.ok ? res.json() : null; })
-                .then(function(data) {
-                    if (!data) return;
-                    var text = starLink.querySelector('.menu-text');
-                    if (text) text.textContent = data.stargazers_count;
-                })
-                .catch(function() {});
+            var img = document.createElement('img');
+            img.src = 'https://img.shields.io/github/stars/' + match[1] + '?style=social';
+            img.alt = 'GitHub stars';
+            img.style.verticalAlign = 'middle';
+            starLink.replaceChildren(img);
         }
     }
 })();
